@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Module id="${project.name}" class="org.modelio.module.scaladesigner.impl.ScalaDesignerModule" binaryversion="3.4.01" version="${project.version}" schema-level="2" uid="4dbfa029-f7e1-44d3-bb7c-d0399b0574f3">
+    <ClassPath>
+        <PathEntry path="lib/${project.artifactId}-${project.version}.jar"/>
+        <PathEntry path="lib/commons-lang3-3.1.jar"/>
+    </ClassPath>
+    <Profiles>
+        <Profile uid="2a24a8f8-de64-423c-86f1-e4b6070713a3" id="TestArchetypeProfile">
+            <Stereotype name="stereotype1" metaclass="Class" is-hidden="false" label="Stereotype 1" uid="c584d0e3-12f4-4ae0-a76b-09779e08df96">
+                <Icon path="res/icons/Stereotype1_16.png"/>
+                <Image path="res/icons/Stereotype1_48.png"/>
+            </Stereotype>
+            <Stereotype name="stereotype2" metaclass="ClassDiagram" is-hidden="false" label="Stereotype 2" uid="b4ba9f70-8c48-49cf-af6a-635b3aea0faa">
+                <Icon path="res/icons/Stereotype2_16.png"/>
+                <Image path="res/icons/Stereotype2_16.png"/>
+            </Stereotype>
+            <MetaclassReference uid="4628c444-321d-488a-b8e2-1cf854132554" metaclass="ModelElement">
+                <TagTypes>
+                    <TagType name="TagName" uid="5a87515d-cc02-4d7c-91a6-b33060c5f63c" label="Name" parameter-card="1" is-hidden="false" is-signed="false"/>
+                </TagTypes>
+            </MetaclassReference>
+        </Profile>
+    </Profiles>
+    <Gui>
+        <Commands>
+            <Command id="HelloWorldCommand" label="%HelloWorldCommandLabel" tooltip="%HelloWorldCommandTooltip" image="res/icons/HelloWorldCommand_16.png" group="" modify-model="false" group-image="">
+                <Scope metaclass="ModelTree"/>
+                <Handler class="org.modelio.module.scaladesigner.command.HelloWorldCommand"/>
+            </Command>
+            <Command id="CreateElementCommandExample" label="%CreateElementCommandExampleLabel" tooltip="%CreateElementCommandExampleTooltip" image="res/icons/Stereotype1_16.png" group="" modify-model="true" group-image="">
+                <Scope metaclass="ModelTree"/>
+                <Handler class="ElementCreate">
+                    <HParameter name="name" value="%CreateElementCommandExampleName"/>
+                    <HParameter name="metaclass" value="Class"/>
+                    <HParameter name="stereotype" value="stereotype1"/>
+                </Handler>
+            </Command>
+            <Command id="CreateDiagramCommandExample" label="%CreateDiagramCommandExampleLabel" tooltip="%CreateDiagramCommandExampleTooltip" image="res/icons/Stereotype2_16.png" group="" modify-model="true" group-image="">
+                <Scope metaclass="ModelTree"/>
+                <Handler class="DiagramCreate">
+                    <HParameter name="name" value="%CreateDiagramCommandExampleName"/>
+                    <HParameter name="metaclass" value="ClassDiagram"/>
+                    <HParameter name="stereotype" value="stereotype2"/>
+                </Handler>
+            </Command>
+        </Commands>
+        <Tools>
+            <Tool id="CreateElementDiagramCommandExample" label="%CreateElementDiagramCommandExampleLabel" tooltip="%CreateElementDiagramCommandExampleTooltip" image="res/icons/Stereotype1_16.png">
+                <Scope-source metaclass="ModelTree"/>
+                <Handler class="Box">
+                    <HParameter name="name" value="%CreateElementDiagramCommandExampleName"/>
+                    <HParameter name="metaclass" value="Class"/>
+                    <HParameter name="stereotype" value="stereotype1"/>
+                </Handler>
+            </Tool>
+        </Tools>
+        <ContextualMenu>
+            <CommandRef refid="HelloWorldCommand"/>
+            <CommandRef refid="CreateElementCommandExample"/>
+            <CommandRef refid="CreateDiagramCommandExample"/>
+        </ContextualMenu>
+        <Diagrams>
+            <DiagramType base-diagram="ClassDiagram" stereotype="stereotype2">
+                <Palette keepBasePalette="false">
+                    <ToolRef refid="CreateElementDiagramCommandExample" group="Customization"/>
+                </Palette>
+                <Handler class="StandardCustomizer"/>
+            </DiagramType>
+        </Diagrams>
+        <Views/>
+    </Gui>
+    <Dependencies/>
+</Module>
