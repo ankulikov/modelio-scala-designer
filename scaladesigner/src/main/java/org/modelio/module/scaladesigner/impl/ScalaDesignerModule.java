@@ -1,6 +1,7 @@
 package org.modelio.module.scaladesigner.impl;
 
 import org.modelio.api.model.IModelingSession;
+import org.modelio.api.modelio.Modelio;
 import org.modelio.api.module.AbstractJavaModule;
 import org.modelio.api.module.IParameterEditionModel;
 import org.modelio.api.module.IModuleAPIConfiguration;
@@ -18,6 +19,8 @@ public class ScalaDesignerModule extends AbstractJavaModule {
 	private ScalaDesignerPeerModule peerModule = null;
 
 	private ScalaDesignerSession session = null;
+
+	public static ScalaDesignerLogService logService;
 
 	@Override
 	public ScalaDesignerPeerModule getPeerModule() {
@@ -86,7 +89,7 @@ public class ScalaDesignerModule extends AbstractJavaModule {
 	 * This constructor must not be called by the user. It is automatically
 	 * invoked by Modelio when the module is installed, selected or started.
      * @param modelingSession the modeling session this module is deployed into.
-     * @param model the model part of this module.
+     * @param moduleComponent the model part of this module.
      * @param moduleConfiguration the module configuration, to get and set parameter values from the module itself.
      * @param peerConfiguration the peer module configuration, to get and set parameter values from another module. 
 	 */
@@ -94,7 +97,8 @@ public class ScalaDesignerModule extends AbstractJavaModule {
 	    super(modelingSession, moduleComponent, moduleConfiguration);
 		this.session = new ScalaDesignerSession(this);
 		this.peerModule = new ScalaDesignerPeerModule(this, peerConfiguration);
-		this.peerModule.init();
+		logService = new ScalaDesignerLogService(Modelio.getInstance().getLogService(), this);
+		this.peerModule.init(); //TODO: in java there is no this line
 	}
 
 	/**

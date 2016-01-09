@@ -2,6 +2,7 @@
 <Module id="${project.name}" class="org.modelio.module.scaladesigner.impl.ScalaDesignerModule" binaryversion="3.4.01" version="${project.version}" schema-level="2" uid="4dbfa029-f7e1-44d3-bb7c-d0399b0574f3">
     <ClassPath>
         <PathEntry path="lib/${project.artifactId}-${project.version}.jar"/>
+        <PathEntry path="lib/xmlreverse-3.0.13.jar"/>
         <PathEntry path="lib/commons-lang3-3.1.jar"/>
     </ClassPath>
     <Profiles>
@@ -43,6 +44,10 @@
                     <HParameter name="stereotype" value="stereotype2"/>
                 </Handler>
             </Command>
+            <Command id="ReverseSources" label="%ReverseSources.label" tooltip="%ReverseSources.tooltip" image="res/bmp/revsources.png" group="%ReverseSources.group" modify-model="true" group-image="%ReverseSources.groupimage">
+                <Scope metaclass="NameSpace"/>
+                <Handler class="org.modelio.module.scaladesigner.command.ReverseSources"/>
+            </Command>
         </Commands>
         <Tools>
             <Tool id="CreateElementDiagramCommandExample" label="%CreateElementDiagramCommandExampleLabel" tooltip="%CreateElementDiagramCommandExampleTooltip" image="res/icons/Stereotype1_16.png">
@@ -58,6 +63,7 @@
             <CommandRef refid="HelloWorldCommand"/>
             <CommandRef refid="CreateElementCommandExample"/>
             <CommandRef refid="CreateDiagramCommandExample"/>
+            <CommandRef refid="ReverseSources"/>
         </ContextualMenu>
         <Diagrams>
             <DiagramType base-diagram="ClassDiagram" stereotype="stereotype2">
