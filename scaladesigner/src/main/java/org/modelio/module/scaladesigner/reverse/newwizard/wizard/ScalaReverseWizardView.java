@@ -9,9 +9,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
 import org.modelio.api.ui.ModelioDialog;
 import org.modelio.module.scaladesigner.i18n.Messages;
-import org.modelio.module.scaladesigner.reverse.newwizard.api.IClasspathModel;
+import org.modelio.module.scaladesigner.reverse.newwizard.api.ISourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.IFileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.filechooser.FileChooserComposite;
+import org.modelio.module.scaladesigner.reverse.newwizard.sourcepath.SourcePathEditorComposite;
 
 
 import java.util.ArrayList;
@@ -30,12 +31,12 @@ public class ScalaReverseWizardView extends ModelioDialog implements Listener {
 
     public IFileChooserModel fileChooserModel;
 
-    public IClasspathModel classpathModel;
+    public ISourcePathModel classpathModel;
 
     List<String> titles = new ArrayList<>();
 
 
-    public ScalaReverseWizardView(Shell parentShell, IFileChooserModel fileChooserModel, IClasspathModel classpathModel) {
+    public ScalaReverseWizardView(Shell parentShell, IFileChooserModel fileChooserModel, ISourcePathModel classpathModel) {
         super(parentShell);
         this.fileChooserModel = fileChooserModel;
         this.classpathModel = classpathModel;
@@ -131,11 +132,11 @@ public class ScalaReverseWizardView extends ModelioDialog implements Listener {
         filechooserTab.setText(Messages.getString("Gui.ScalaReverseWizardView.FileChooserTab.Name"));
         filechooserTab.setControl(new FileChooserComposite(this.tabFolder, this.fileChooserModel));
         
-//        // Create classpath tab
-//        TabItem classpathTab = new TabItem(this.tabFolder, SWT.NONE);
-//        this.titles.add(Messages.getString("Gui.ScalaReverseWizardView.ClasspathTab.Title"));
-//        classpathTab.setText(Messages.getString("Gui.ScalaReverseWizardView.ClasspathTab.Name"));
-//        classpathTab.setControl(new ClasspathEditorComposite(this.tabFolder, this.classpathModel));
+        // Create classpath tab
+        TabItem classpathTab = new TabItem(this.tabFolder, SWT.NONE);
+        this.titles.add(Messages.getString("Gui.ScalaReverseWizardView.SourcePathTab.Title"));
+        classpathTab.setText(Messages.getString("Gui.ScalaReverseWizardView.SourcePathTab.Name"));
+        classpathTab.setControl(new SourcePathEditorComposite(this.tabFolder, this.classpathModel));
 
         return root_composite;
     }

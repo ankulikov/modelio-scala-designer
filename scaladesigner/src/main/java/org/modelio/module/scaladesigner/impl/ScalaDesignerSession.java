@@ -1,12 +1,15 @@
 package org.modelio.module.scaladesigner.impl;
 
-import java.util.Map;
-
 import org.modelio.api.log.ILogService;
-import org.modelio.api.module.DefaultModuleSession;
-import org.modelio.api.module.ModuleException;
 import org.modelio.api.modelio.Modelio;
+import org.modelio.api.module.DefaultModuleSession;
+import org.modelio.api.module.IModuleUserConfiguration;
+import org.modelio.api.module.ModuleException;
+import org.modelio.module.scaladesigner.api.ScalaDesignerParameters;
 import org.modelio.vbasic.version.Version;
+
+import java.io.File;
+import java.util.Map;
 
 /**
  * Implementation of the IModuleSession interface.
@@ -14,63 +17,65 @@ import org.modelio.vbasic.version.Version;
  */
 public class ScalaDesignerSession extends DefaultModuleSession {
 
-	/**
-	 * Constructor.
-	 * @param module the Module this session is instanciated for.
-	 */
-	public ScalaDesignerSession(ScalaDesignerModule module) {
-		super(module);
-	}
+    /**
+     * Constructor.
+     *
+     * @param module the Module this session is instanciated for.
+     */
+    public ScalaDesignerSession(ScalaDesignerModule module) {
+        super(module);
+    }
 
-	/**
-	 * @see org.modelio.api.module.DefaultModuleSession#start()
-	 */
-	@Override
-	public boolean start() throws ModuleException {
-		// get the version of the module
-		Version moduleVersion = this.module.getVersion();
+    public static boolean install(String modelioPath, String mdaPath) throws ModuleException {
+        return DefaultModuleSession.install(modelioPath, mdaPath);
+    }
 
-		// get the Modelio log service
-		ILogService logService = Modelio.getInstance().getLogService();
+    /**
+     * @see org.modelio.api.module.DefaultModuleSession#start()
+     */
+    @Override
+    public boolean start() throws ModuleException {
+        // get the version of the module
+        Version moduleVersion = this.module.getVersion();
 
-		String message = "Start of " + this.module.getName() + " " + moduleVersion;
-		logService.info(this.module, message);
-		return super.start();
-	}
+        // get the Modelio log service
+        ILogService logService = Modelio.getInstance().getLogService();
 
-	/**
-	 * @see org.modelio.api.module.DefaultModuleSession#stop()
-	 */
-	@Override
-	public void stop() throws ModuleException {
-		super.stop();
-	}
+        String message = "Start of " + this.module.getName() + " " + moduleVersion;
+        logService.info(this.module, message);
 
-	public static boolean install(String modelioPath, String mdaPath) throws ModuleException {
-		return DefaultModuleSession.install(modelioPath, mdaPath);
-	}
+        //TODO: how to set module.getConfiguration().setParameterValue here
 
-	/**
-	 * @see org.modelio.api.module.DefaultModuleSession#select()
-	 */
-	@Override
-	public boolean select() throws ModuleException {
-		return super.select();
-	}
+        return super.start();
+    }
 
-	/**
-	 * @see org.modelio.api.module.DefaultModuleSession#unselect()
-	 */
-	@Override
-	public void unselect() throws ModuleException {
-		super.unselect();
-	}
+    /**
+     * @see org.modelio.api.module.DefaultModuleSession#stop()
+     */
+    @Override
+    public void stop() throws ModuleException {
+        super.stop();
+    }
 
-	/**
-	 * @see org.modelio.api.module.DefaultModuleSession#upgrade(org.modelio.api.modelio.Version, java.util.Map)
-	 */
-	@Override
-	public void upgrade(Version oldVersion, Map<String, String> oldParameters) throws ModuleException {
-		super.upgrade(oldVersion, oldParameters);
-	}
+    /**
+     * @see org.modelio.api.module.DefaultModuleSession#select()
+     */
+    @Override
+    public boolean select() throws ModuleException {
+
+        return super.select();
+    }
+
+    /**
+     * @see org.modelio.api.module.DefaultModuleSession#unselect()
+     */
+    @Override
+    public void unselect() throws ModuleException {
+        super.unselect();
+    }
+
+    @Override
+    public void upgrade(Version oldVersion, Map<String, String> oldParameters) throws ModuleException {
+        super.upgrade(oldVersion, oldParameters);
+    }
 }
