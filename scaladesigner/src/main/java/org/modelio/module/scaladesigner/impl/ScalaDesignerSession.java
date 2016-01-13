@@ -1,11 +1,15 @@
 package org.modelio.module.scaladesigner.impl;
 
 import org.modelio.api.log.ILogService;
+import org.modelio.api.model.change.IModelChangeHandler;
+import org.modelio.api.model.change.IModelChangeListener;
+import org.modelio.api.model.change.IStatusChangeHandler;
 import org.modelio.api.modelio.Modelio;
 import org.modelio.api.module.DefaultModuleSession;
 import org.modelio.api.module.IModuleUserConfiguration;
 import org.modelio.api.module.ModuleException;
 import org.modelio.module.scaladesigner.api.ScalaDesignerParameters;
+import org.modelio.module.scaladesigner.reverse.newwizard.ImageManager;
 import org.modelio.vbasic.version.Version;
 
 import java.io.File;
@@ -43,6 +47,17 @@ public class ScalaDesignerSession extends DefaultModuleSession {
 
         String message = "Start of " + this.module.getName() + " " + moduleVersion;
         logService.info(this.module, message);
+
+        IModuleUserConfiguration configuration = this.module.getConfiguration ();
+        // Init image cache
+        String modulePath = this.module.getConfiguration().getModuleResourcesPath().toAbsolutePath().toString();
+        ImageManager.setModulePath(modulePath);
+
+        String scalaSourcesParam = configuration.getParameterValue(ScalaDesignerParameters.SCALA_SOURCES);
+        if (scalaSourcesParam == null || scalaSourcesParam.isEmpty()) {
+            configuration.setParameterValue(ScalaDesignerParameters.SCALA_SOURCES,
+                    "D:\\Downloads\\scala-2.11.7\\scala-2.11.7");
+        }
 
         //TODO: how to set module.getConfiguration().setParameterValue here
 

@@ -7,7 +7,10 @@ import org.modelio.api.module.IParameterEditionModel;
 import org.modelio.api.module.IModuleAPIConfiguration;
 import org.modelio.api.module.IModuleSession;
 import org.modelio.api.module.IModuleUserConfiguration;
+import org.modelio.api.module.paramEdition.*;
 import org.modelio.metamodel.mda.ModuleComponent;
+import org.modelio.module.scaladesigner.api.ScalaDesignerParameters;
+import org.modelio.module.scaladesigner.i18n.Messages;
 
 /**
  * Implementation of the IModule interface.
@@ -107,7 +110,23 @@ public class ScalaDesignerModule extends AbstractJavaModule {
 	@Override
 	public IParameterEditionModel getParametersEditionModel() {
 	    if (this.parameterEditionModel == null) {
-	        this.parameterEditionModel = super.getParametersEditionModel();
+			IModuleUserConfiguration configuration = this.getConfiguration();
+			ParametersEditionModel parameters = new ParametersEditionModel(this);
+			EnumParameterModel enumParameter;
+			this.parameterEditionModel = parameters;
+
+			ParameterGroupModel locations = new ParameterGroupModel("LocationsGM",
+					Messages.getString("Ui.Parameter.GroupModel.Locations"));
+			parameters.addGroup(locations);
+			DirectoryParameterModel scalaSourcesParameter = new DirectoryParameterModel(configuration, ScalaDesignerParameters.SCALA_SOURCES,
+					Messages.getString("Ui.Parameter.ScalaSources.Label"), Messages.getString("Ui.Parameter.ScalaSources.Description"), "");
+			locations.addParameter(scalaSourcesParameter);
+
+			FileParameterModel scalaCompilerParameter = new FileParameterModel(configuration, ScalaDesignerParameters.SCALA_COMPILER,
+					Messages.getString("Ui.Parameter.ScalaCompiler.Label"), Messages.getString("Ui.Parameter.ScalaCompiler.Description"), "");
+			//TODO: add .sh for UNIX systems
+			scalaCompilerParameter.addAllowedExtension("*.exe","Executable files (*.exe)");
+			locations.addParameter(scalaCompilerParameter);
 	    }
 		return this.parameterEditionModel;
 	}

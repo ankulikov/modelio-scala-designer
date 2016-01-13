@@ -22,6 +22,10 @@
             </MetaclassReference>
         </Profile>
     </Profiles>
+    <Parameters>
+        <Parameter id="ScalaSources" uid="379f6bf8-fc59-44aa-bbc6-290360257cb9"/>
+        <Parameter id="ScalaCompiler" uid="fcba883f-2ff7-4aa4-a4ee-e305e0017f81"/>
+    </Parameters>
     <Gui>
         <Commands>
             <Command id="HelloWorldCommand" label="%HelloWorldCommandLabel" tooltip="%HelloWorldCommandTooltip" image="res/icons/HelloWorldCommand_16.png" group="" modify-model="false" group-image="">
