@@ -37,7 +37,7 @@ public class SourcePathEditorComposite extends Composite {
         fd_modelElementsIncludedGroup.left = new FormAttachment(0, 5);
         modelElementsIncludedGroup.setLayoutData(fd_modelElementsIncludedGroup);
 
-        final Tree tree = new Tree(modelElementsIncludedGroup, SWT.SINGLE | SWT.BORDER | SWT.RADIO);
+        final Tree tree = new Tree(modelElementsIncludedGroup, SWT.SINGLE | SWT.BORDER | SWT.CHECK);
         this.treeViewer = new CheckboxTreeViewer(tree);
         this.treeViewer.setContentProvider(new ListContentProvider());
         this.treeViewer.setLabelProvider(new SourcePathLabelProvider());
