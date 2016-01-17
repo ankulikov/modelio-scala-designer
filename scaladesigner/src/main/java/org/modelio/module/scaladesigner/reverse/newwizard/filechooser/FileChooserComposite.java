@@ -35,11 +35,14 @@ public class FileChooserComposite extends Composite implements Listener {
 
     public void createContent() {
         this.setLayout(new GridLayout(2, false));
-        
+
+        boolean isDirectory = model.getInitialDirectory().isDirectory();
+        String absolutePath = isDirectory ? model.getInitialDirectory().getAbsolutePath(): model.getInitialDirectory().getParentFile().getAbsolutePath();
+
         this.addressText = new Text(this, SWT.BORDER);
         this.addressText.setLayoutData(new GridData(SWT.FILL, SWT.FILL,
                 true, false));
-        this.addressText.setText(this.model.getInitialDirectory().getAbsolutePath());
+        this.addressText.setText(absolutePath);
         this.addressText.addListener(SWT.Modify, this);
         
         this.fileChooserButton = new Button(this, SWT.NONE);
@@ -51,14 +54,16 @@ public class FileChooserComposite extends Composite implements Listener {
         this.previewText = new Text(this, SWT.READ_ONLY);
         this.previewText.setLayoutData(new GridData(SWT.FILL, SWT.FILL,
                 true, false, 2, 1));
-        this.previewText.setText(Messages.getString("Gui.ScalaReverseWizardView.FileChooserTab.Preview", this.model.getInitialDirectory()));
+        this.previewText.setText(Messages.getString("Gui.ScalaReverseWizardView.FileChooserTab.Preview",  absolutePath));
         this.previewText.setForeground(UIColor.LABEL_TIP_FG);
+
         
         this.treeViewer = new CheckboxTreeViewer(this, SWT.SINGLE
                 | SWT.BORDER | SWT.CHECK);
         this.treeViewer.setContentProvider(new FileContentProvider());
         this.treeViewer.setLabelProvider(new FileLabelProvider());
-        this.treeViewer.setInput(this.model.getInitialDirectory());
+        this.treeViewer.setInput(isDirectory? this.model.getInitialDirectory():model.getInitialDirectory().getParentFile());
+
         
         FileFilter[] filters = { new FileFilter(this.model.getValidExtensions()) };
         this.treeViewer.setFilters(filters);
@@ -70,7 +75,13 @@ public class FileChooserComposite extends Composite implements Listener {
         this.treeViewer.addCheckStateListener(hook);
         
         this.treeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+        if (!isDirectory) {
+            treeViewer.setChecked(model.getInitialDirectory(), true);
+            //small hack to apply 'on check' logic
+            hook.checkStateChanged(new CheckStateChangedEvent(treeViewer,model.getInitialDirectory(),true));
+        }
     }
+
 
     @Override
     public void handleEvent(Event event) {

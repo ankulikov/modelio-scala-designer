@@ -17,7 +17,7 @@ public class ReverseConfig {
 
     private List<File> sourcepath;
 
-    private List<File> classpath;
+    private File compiler;
 
     private File containerFile;
 
@@ -28,7 +28,6 @@ public class ReverseConfig {
 
     private IReportWriter report;
 
-    private List<IVisitorElement> filteredElements;
 
     /**
      * @return the filesToReverse
@@ -46,20 +45,6 @@ public class ReverseConfig {
     
     public List<File> getSourcepath() {
         return this.sourcepath;
-    }
-
-    /**
-     * @return the classpath
-     */
-    public List<File> getClasspath() {
-        return this.classpath;
-    }
-
-    /**
-     * @param classpath the classpath to set
-     */
-    public void setClasspath(List<File> classpath) {
-        this.classpath = classpath;
     }
 
     /**
@@ -82,31 +67,15 @@ public class ReverseConfig {
     public File getOutputFile() {
         return this.outputFile;
     }
-    
 
-    /**
-     * @return the filteredElements
-     */
-    public List<IVisitorElement> getFilteredElements() {
-        return this.filteredElements;
-    }
-
-    /**
-     * @param filteredElements the filteredElements to set
-     */
-    public void setFilteredElements(List<IVisitorElement> filteredElements) {
-        this.filteredElements = filteredElements;
-    }
 
     public ReverseConfig(Hashtable<String, ElementStatus> filesToReverse,
                          List<File> sourcepath,
-                         List<File> classpath,
-
                          File containerFile,
                          File outputFile) {
         this.filesToReverse = filesToReverse;
         this.sourcepath = sourcepath;
-        this.classpath = classpath;
+
         this.containerFile = containerFile;
         this.outputFile = outputFile;
     }
@@ -127,12 +96,7 @@ public class ReverseConfig {
         for (File path : this.sourcepath) {
             ScalaDesignerModule.logService.info ("sourcepath=" + path); //$NON-NLS-1$
         }
-        
-        ScalaDesignerModule.logService.info ("Nb classpath=" + //$NON-NLS-1$
-                this.classpath.size ());
-        for (File path : this.classpath) {
-            ScalaDesignerModule.logService.info ("classpath=" + path); //$NON-NLS-1$
-        }
+
         ScalaDesignerModule.logService.info ("containerFile=" + this.containerFile); //$NON-NLS-1$
         ScalaDesignerModule.logService.info ("outputFile=" + this.outputFile); //$NON-NLS-1$
         ScalaDesignerModule.logService.info ("---------------");
@@ -152,6 +116,27 @@ public class ReverseConfig {
 
     public void setReverseRoot(NameSpace reverseRoot) {
         this.reverseRoot = reverseRoot;
+    }
+
+    public File getCompiler() {
+        return compiler;
+    }
+
+    public void setCompiler(File compiler) {
+        this.compiler = compiler;
+    }
+
+    @Override
+    public String toString() {
+        return "ReverseConfig{" +
+                "filesToReverse=" + filesToReverse +
+                ", sourcepath=" + sourcepath +
+                ", compiler=" + compiler +
+                ", containerFile=" + containerFile +
+                ", outputFile=" + outputFile +
+                ", reverseRoot=" + reverseRoot +
+                ", report=" + report +
+                '}';
     }
 
     //TODO: add encoding?

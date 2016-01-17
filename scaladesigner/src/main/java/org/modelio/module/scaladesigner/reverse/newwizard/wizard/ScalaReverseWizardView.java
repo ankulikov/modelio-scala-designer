@@ -9,6 +9,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.*;
 import org.modelio.api.ui.ModelioDialog;
 import org.modelio.module.scaladesigner.i18n.Messages;
+import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.ISourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.IFileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.filechooser.FileChooserComposite;

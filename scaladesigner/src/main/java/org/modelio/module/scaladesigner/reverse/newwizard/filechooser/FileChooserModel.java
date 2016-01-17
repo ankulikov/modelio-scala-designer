@@ -21,16 +21,14 @@ public class FileChooserModel implements IFileChooserModel {
     private List<IVisitorElement> result;
 
     private Set<File> cachedFiles;
+
     
-    private ReverseConfig config;
-    
-    public FileChooserModel(File initialDirectory, List<String> extensions, ReverseConfig config) {
+    public FileChooserModel(File initialDirectory, List<String> extensions) {
         this.initialDirectory = initialDirectory;
         this.filesToImport = new ArrayList<>();
         this.extensions = extensions;
         this.result = new ArrayList<>();
         this.cachedFiles = new HashSet<>();
-        this.config = config;
     }
 
     @Override

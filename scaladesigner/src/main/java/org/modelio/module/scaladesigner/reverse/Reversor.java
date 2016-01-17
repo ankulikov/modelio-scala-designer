@@ -3,23 +3,29 @@ package org.modelio.module.scaladesigner.reverse;
 import com.modelio.module.xmlreverse.IReportWriter;
 import org.eclipse.swt.widgets.Display;
 import org.modelio.api.model.IModelingSession;
+import org.modelio.api.model.ITransaction;
+import org.modelio.api.model.InvalidTransactionException;
+import org.modelio.api.modelio.Modelio;
 import org.modelio.api.module.IModule;
 import org.modelio.api.module.IModuleUserConfiguration;
+import org.modelio.metamodel.mda.Project;
 import org.modelio.metamodel.uml.statik.NameSpace;
+import org.modelio.metamodel.uml.statik.Package;
 import org.modelio.module.scaladesigner.api.ScalaDesignerParameters;
+import org.modelio.module.scaladesigner.i18n.Messages;
+import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.newwizard.ImageManager;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.IFileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.ISourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.filechooser.FileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.sourcepath.ScalaSourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.wizard.ScalaReverseWizardView;
+import org.modelio.module.scaladesigner.reverse.ui.ElementStatus;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
+import static org.modelio.module.scaladesigner.reverse.ui.ElementStatus.*;
 import static org.modelio.module.scaladesigner.util.ScalaDesignerUtils.noParamter;
 
 public class Reversor {
@@ -46,13 +52,54 @@ public class Reversor {
         List<String> extensions = new ArrayList<>();
         extensions.add(".scala");
 
-        String modulePath = module.getConfiguration().getModuleResourcesPath().toAbsolutePath().toString();
-        ImageManager.setModulePath(modulePath);
+        if (withWizard) {
+            // Reverse with wizard
+            // Build the elements to reverse
+            try (ITransaction transaction = session.createTransaction(Messages.getString("Info.Session.Reverse"))) {
+                // ===================== Config ==========================================
+                ReverseConfig config = new ReverseConfig(
+                        new Hashtable<>(), new ArrayList<>(), null, null);
+                // Store the reverse root
+                if (this.elementsToReverse.size () == 1) {
+                    config.setReverseRoot (this.elementsToReverse.iterator ().next ());
+                } else {
+                    config.setReverseRoot (getFirstRootPackage());
+                }
+                // ==================== Create Wizard Models ==============================
+                String modulePath = module.getConfiguration().getModuleResourcesPath().toAbsolutePath().toString();
+                ImageManager.setModulePath(modulePath);
 
-        IFileChooserModel scalaFileChooserModel = new FileChooserModel(this.module.getConfiguration().getProjectSpacePath().toFile(), extensions, new ReverseConfig(null, null, null, null, null));
+                IFileChooserModel scalaFileChooserModel = new FileChooserModel(this.module.getConfiguration().getProjectSpacePath().toFile(), extensions);
 
-        ScalaReverseWizardView reverseWizardView = new ScalaReverseWizardView(Display.getDefault().getActiveShell(), scalaFileChooserModel, createSourcePathModel(), createCompilerChooserModel());
-        int open = reverseWizardView.open();
+                ISourcePathModel sourcePathModel = createSourcePathModel();
+                IFileChooserModel compilerChooserModel = createCompilerChooserModel();
+                ScalaReverseWizardView reverseWizardView = new ScalaReverseWizardView(Display.getDefault().getActiveShell(), scalaFileChooserModel, sourcePathModel, compilerChooserModel);
+                // =====================  Get Result From Wizard ==================================
+                int open = reverseWizardView.open();
+                //set directory of scala sources (root folder form GitHub)
+                if (sourcePathModel.isUsed())
+                    config.getSourcepath().add(sourcePathModel.getInitialDirectory());
+                //set files to reverse
+                for (File f : scalaFileChooserModel.getFilesToImport()) {
+                    if (f.isDirectory()) {
+                        config.getFilesToReverse().put (f.getAbsolutePath(), new ElementStatus(f.getAbsolutePath(), ElementType.DIRECTORY, ReverseStatus.REVERSE));
+                    } else {
+                        config.getFilesToReverse().put (f.getAbsolutePath(), new ElementStatus(f.getAbsolutePath(), ElementType.JAVA_FILE, ReverseStatus.REVERSE));
+                    }
+                }
+                //set compiler path
+                ScalaDesignerModule.logService.info("CompilerChooserModel files to import: "+compilerChooserModel.getFilesToImport());
+                config.setCompiler(compilerChooserModel.getFilesToImport().get(0));
+                ScalaDesignerModule.logService.info("Config: "+config.toString());
+                //========== Process Config ============================
+
+
+            } catch (InvalidTransactionException e) {
+                // Error during the commit, the rollback is already done
+            } catch (Exception e) {
+                ScalaDesignerModule.logService.error(e);
+            }
+        }
 
     }
 
@@ -65,6 +112,7 @@ public class Reversor {
             absolutePath = module.getConfiguration().getProjectSpacePath().toFile();
         } else
             absolutePath = new File(configuration.getParameterValue(ScalaDesignerParameters.SCALA_SOURCES));
+        ScalaDesignerModule.logService.info("createSourcePathModel path: "+absolutePath);
         return new ScalaSourcePathModel(absolutePath);
     }
 
@@ -82,8 +130,17 @@ public class Reversor {
             absolutePath = module.getConfiguration().getProjectSpacePath().toFile();
         } else
             absolutePath = new File(configuration.getParameterValue(ScalaDesignerParameters.SCALA_COMPILER));
-        return new FileChooserModel(absolutePath, extensions, new ReverseConfig(null, null, null, null, null));
+        ScalaDesignerModule.logService.info("createCompilerChooserModel path: "+absolutePath);
+        return new FileChooserModel(absolutePath, extensions);
 
+    }
+
+    private Package getFirstRootPackage() {
+        //noinspection LoopStatementThatDoesntLoop
+        for (Project project : Modelio.getInstance().getModelingSession().findByClass(Project.class)) {
+            return project.getModel();
+        }
+        return null;
     }
 
 }
