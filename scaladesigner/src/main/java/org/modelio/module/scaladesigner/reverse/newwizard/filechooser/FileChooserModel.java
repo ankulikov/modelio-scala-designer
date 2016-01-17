@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ScalaFileChooserModel implements IFileChooserModel {
+public class FileChooserModel implements IFileChooserModel {
     private List<File> filesToImport;
 
     private File initialDirectory;
@@ -21,12 +21,10 @@ public class ScalaFileChooserModel implements IFileChooserModel {
     private List<IVisitorElement> result;
 
     private Set<File> cachedFiles;
-
-    private JaxbReversedData cachedModel;
     
     private ReverseConfig config;
     
-    public ScalaFileChooserModel(File initialDirectory, List<String> extensions, ReverseConfig config) {
+    public FileChooserModel(File initialDirectory, List<String> extensions, ReverseConfig config) {
         this.initialDirectory = initialDirectory;
         this.filesToImport = new ArrayList<>();
         this.extensions = extensions;
@@ -70,13 +68,14 @@ public class ScalaFileChooserModel implements IFileChooserModel {
     public String getValidExtensionsList() {
         // Build the extension list
         StringBuilder extensionsList = new StringBuilder();
-        
-        for (String extension : this.getValidExtensions()) {
-            extensionsList.append(extension);
-            extensionsList.append(", ");
+
+        if (getValidExtensions().size() >0) {
+            for (String extension : this.getValidExtensions()) {
+                extensionsList.append(extension);
+                extensionsList.append(", ");
+            }
+            extensionsList.delete(extensionsList.length() - 2, extensionsList.length());
         }
-        extensionsList.delete(extensionsList.length() - 2, extensionsList.length());
-        
         return extensionsList.toString();
     }
 

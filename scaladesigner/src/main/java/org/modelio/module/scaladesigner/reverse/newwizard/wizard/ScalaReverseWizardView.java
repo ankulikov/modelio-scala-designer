@@ -31,15 +31,18 @@ public class ScalaReverseWizardView extends ModelioDialog implements Listener {
 
     public IFileChooserModel fileChooserModel;
 
-    public ISourcePathModel classpathModel;
+    public ISourcePathModel sourcePathModel;
+
+    public IFileChooserModel compilerChooserModel;
 
     List<String> titles = new ArrayList<>();
 
 
-    public ScalaReverseWizardView(Shell parentShell, IFileChooserModel fileChooserModel, ISourcePathModel classpathModel) {
+    public ScalaReverseWizardView(Shell parentShell, IFileChooserModel scalaFileChooserModel, ISourcePathModel sourcePathModel, IFileChooserModel compilerChooserModel) {
         super(parentShell);
-        this.fileChooserModel = fileChooserModel;
-        this.classpathModel = classpathModel;
+        this.fileChooserModel = scalaFileChooserModel;
+        this.sourcePathModel = sourcePathModel;
+        this.compilerChooserModel = compilerChooserModel;
     }
 
     @Override
@@ -136,7 +139,13 @@ public class ScalaReverseWizardView extends ModelioDialog implements Listener {
         TabItem classpathTab = new TabItem(this.tabFolder, SWT.NONE);
         this.titles.add(Messages.getString("Gui.ScalaReverseWizardView.SourcePathTab.Title"));
         classpathTab.setText(Messages.getString("Gui.ScalaReverseWizardView.SourcePathTab.Name"));
-        classpathTab.setControl(new SourcePathEditorComposite(this.tabFolder, this.classpathModel));
+        classpathTab.setControl(new SourcePathEditorComposite(this.tabFolder, this.sourcePathModel));
+
+        //Create compiler chooser tab
+        TabItem compilerChooserTab = new TabItem(this.tabFolder, SWT.NONE);
+        this.titles.add(Messages.getString("Gui.ScalaReverseWizardView.CompilerChooserTab.Title", this.compilerChooserModel.getValidExtensionsList()));
+        compilerChooserTab.setText(Messages.getString("Gui.ScalaReverseWizardView.CompilerChooserTab.Name"));
+        compilerChooserTab.setControl(new FileChooserComposite(this.tabFolder, this.compilerChooserModel));
 
         return root_composite;
     }

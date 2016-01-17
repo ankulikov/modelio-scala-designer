@@ -7,11 +7,10 @@ import org.modelio.api.module.IModule;
 import org.modelio.api.module.IModuleUserConfiguration;
 import org.modelio.metamodel.uml.statik.NameSpace;
 import org.modelio.module.scaladesigner.api.ScalaDesignerParameters;
-import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.newwizard.ImageManager;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.IFileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.ISourcePathModel;
-import org.modelio.module.scaladesigner.reverse.newwizard.filechooser.ScalaFileChooserModel;
+import org.modelio.module.scaladesigner.reverse.newwizard.filechooser.FileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.sourcepath.ScalaSourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.wizard.ScalaReverseWizardView;
 
@@ -20,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
+import static org.modelio.module.scaladesigner.util.ScalaDesignerUtils.noParamter;
 
 public class Reversor {
     public ReverseMode lastReverseMode = ReverseMode.Retrieve;
@@ -48,26 +49,41 @@ public class Reversor {
         String modulePath = module.getConfiguration().getModuleResourcesPath().toAbsolutePath().toString();
         ImageManager.setModulePath(modulePath);
 
-        IFileChooserModel fileChooserModel = new ScalaFileChooserModel(this.module.getConfiguration().getProjectSpacePath().toFile(), extensions, new ReverseConfig(null, null, null, null, null));
+        IFileChooserModel scalaFileChooserModel = new FileChooserModel(this.module.getConfiguration().getProjectSpacePath().toFile(), extensions, new ReverseConfig(null, null, null, null, null));
 
-        ScalaReverseWizardView reverseWizardView = new ScalaReverseWizardView(Display.getDefault().getActiveShell(), fileChooserModel,createSourcePathModel());
+        ScalaReverseWizardView reverseWizardView = new ScalaReverseWizardView(Display.getDefault().getActiveShell(), scalaFileChooserModel, createSourcePathModel(), createCompilerChooserModel());
         int open = reverseWizardView.open();
 
     }
 
     private ISourcePathModel createSourcePathModel() {
-        String absolutePath = new File("D:\\Downloads\\scala-2.11.7\\scala-2.11.7").getAbsolutePath();
-//        IModuleUserConfiguration configuration = this.module.getConfiguration();
-//
-//        ScalaDesignerModule.logService.info("absolute path: " + absolutePath);
-//        configuration.setParameterValue(ScalaDesignerParameters.SCALA_SOURCES, absolutePath);
-//        String value = module.getConfiguration()
-//                .getParameterValue(ScalaDesignerParameters.SCALA_SOURCES);
-//        ScalaDesignerModule.logService.info("param value: " + value);
 
+        File absolutePath;
+        IModuleUserConfiguration configuration = this.module.getConfiguration();
 
-        ScalaDesignerModule.logService.info("Source path: "+absolutePath);
-        return new ScalaSourcePathModel(new File(absolutePath));
+        if (noParamter(configuration, ScalaDesignerParameters.SCALA_SOURCES)) {
+            absolutePath = module.getConfiguration().getProjectSpacePath().toFile();
+        } else
+            absolutePath = new File(configuration.getParameterValue(ScalaDesignerParameters.SCALA_SOURCES));
+        return new ScalaSourcePathModel(absolutePath);
+    }
+
+    private IFileChooserModel createCompilerChooserModel() {
+        List<String> extensions = new ArrayList<>();
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win"))
+            extensions.add(".bat");
+        else
+            extensions.add(".*");
+        IModuleUserConfiguration configuration = this.module.getConfiguration();
+
+        File absolutePath;
+        if (noParamter(configuration, ScalaDesignerParameters.SCALA_COMPILER)) {
+            absolutePath = module.getConfiguration().getProjectSpacePath().toFile();
+        } else
+            absolutePath = new File(configuration.getParameterValue(ScalaDesignerParameters.SCALA_COMPILER));
+        return new FileChooserModel(absolutePath, extensions, new ReverseConfig(null, null, null, null, null));
 
     }
+
 }

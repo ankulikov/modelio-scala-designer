@@ -56,7 +56,12 @@ public class ScalaDesignerSession extends DefaultModuleSession {
         String scalaSourcesParam = configuration.getParameterValue(ScalaDesignerParameters.SCALA_SOURCES);
         if (scalaSourcesParam == null || scalaSourcesParam.isEmpty()) {
             configuration.setParameterValue(ScalaDesignerParameters.SCALA_SOURCES,
-                    "D:\\Downloads\\scala-2.11.7\\scala-2.11.7");
+                    "C:\\Program Files (x86)\\scala\\sources");
+        }
+        String compilerParam = configuration.getParameterValue(ScalaDesignerParameters.SCALA_COMPILER);
+        if (compilerParam == null || compilerParam.isEmpty()) {
+            configuration.setParameterValue(ScalaDesignerParameters.SCALA_COMPILER,
+                    "C:\\Program Files (x86)\\scala\\bin\\scalac.bat");
         }
 
         //TODO: how to set module.getConfiguration().setParameterValue here

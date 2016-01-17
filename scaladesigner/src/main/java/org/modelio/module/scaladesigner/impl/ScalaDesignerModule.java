@@ -124,8 +124,7 @@ public class ScalaDesignerModule extends AbstractJavaModule {
 
 			FileParameterModel scalaCompilerParameter = new FileParameterModel(configuration, ScalaDesignerParameters.SCALA_COMPILER,
 					Messages.getString("Ui.Parameter.ScalaCompiler.Label"), Messages.getString("Ui.Parameter.ScalaCompiler.Description"), "");
-			//TODO: add .sh for UNIX systems
-			scalaCompilerParameter.addAllowedExtension("*.exe","Executable files (*.exe)");
+			scalaCompilerParameter.addAllowedExtension("*.*","Scala compiler");
 			locations.addParameter(scalaCompilerParameter);
 	    }
 		return this.parameterEditionModel;
