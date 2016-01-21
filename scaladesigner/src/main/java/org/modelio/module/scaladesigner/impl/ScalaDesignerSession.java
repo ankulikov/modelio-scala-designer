@@ -64,7 +64,7 @@ public class ScalaDesignerSession extends DefaultModuleSession {
                     "C:\\Program Files (x86)\\scala\\bin\\scalac.bat");
         }
 
-        //TODO: how to set module.getConfiguration().setParameterValue here
+
 
         return super.start();
     }

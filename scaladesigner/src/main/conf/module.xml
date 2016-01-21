@@ -4,6 +4,8 @@
         <PathEntry path="lib/${project.artifactId}-${project.version}.jar"/>
         <PathEntry path="lib/xmlreverse-3.0.13.jar"/>
         <PathEntry path="lib/commons-lang3-3.1.jar"/>
+        <PathEntry path="lib/commons-io-2.4.jar"/>
+        <PathEntry path="lib/scala-ast-parser-0.5.jar"/>
     </ClassPath>
     <Profiles>
         <Profile uid="2a24a8f8-de64-423c-86f1-e4b6070713a3" id="TestArchetypeProfile">

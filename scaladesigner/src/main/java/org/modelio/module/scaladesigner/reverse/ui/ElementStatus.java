@@ -52,7 +52,7 @@ public class ElementStatus {
 
     public enum ElementType {
         DIRECTORY,
-        JAVA_FILE,
+        SCALA_FILE,
         CLASS_FILE;
     }
 

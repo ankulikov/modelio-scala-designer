@@ -20,12 +20,16 @@ import org.modelio.module.scaladesigner.reverse.newwizard.api.ISourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.filechooser.FileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.sourcepath.ScalaSourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.wizard.ScalaReverseWizardView;
+import org.modelio.module.scaladesigner.reverse.process.api.IProcessRunner;
+import org.modelio.module.scaladesigner.reverse.process.impl.ScalacProcessRunner;
+import org.modelio.module.scaladesigner.reverse.scalautil.io.ScalaFileFinder;
 import org.modelio.module.scaladesigner.reverse.ui.ElementStatus;
 
 import java.io.File;
 import java.util.*;
 
-import static org.modelio.module.scaladesigner.reverse.ui.ElementStatus.*;
+import static org.modelio.module.scaladesigner.reverse.ui.ElementStatus.ElementType;
+import static org.modelio.module.scaladesigner.reverse.ui.ElementStatus.ReverseStatus;
 import static org.modelio.module.scaladesigner.util.ScalaDesignerUtils.noParamter;
 
 public class Reversor {
@@ -60,10 +64,10 @@ public class Reversor {
                 ReverseConfig config = new ReverseConfig(
                         new Hashtable<>(), new ArrayList<>(), null, null);
                 // Store the reverse root
-                if (this.elementsToReverse.size () == 1) {
-                    config.setReverseRoot (this.elementsToReverse.iterator ().next ());
+                if (this.elementsToReverse.size() == 1) {
+                    config.setReverseRoot(this.elementsToReverse.iterator().next());
                 } else {
-                    config.setReverseRoot (getFirstRootPackage());
+                    config.setReverseRoot(getFirstRootPackage());
                 }
                 // ==================== Create Wizard Models ==============================
                 String modulePath = module.getConfiguration().getModuleResourcesPath().toAbsolutePath().toString();
@@ -75,24 +79,29 @@ public class Reversor {
                 IFileChooserModel compilerChooserModel = createCompilerChooserModel();
                 ScalaReverseWizardView reverseWizardView = new ScalaReverseWizardView(Display.getDefault().getActiveShell(), scalaFileChooserModel, sourcePathModel, compilerChooserModel);
                 // =====================  Get Result From Wizard ==================================
-                int open = reverseWizardView.open();
-                //set directory of scala sources (root folder form GitHub)
-                if (sourcePathModel.isUsed())
-                    config.getSourcepath().add(sourcePathModel.getInitialDirectory());
-                //set files to reverse
-                for (File f : scalaFileChooserModel.getFilesToImport()) {
-                    if (f.isDirectory()) {
-                        config.getFilesToReverse().put (f.getAbsolutePath(), new ElementStatus(f.getAbsolutePath(), ElementType.DIRECTORY, ReverseStatus.REVERSE));
-                    } else {
-                        config.getFilesToReverse().put (f.getAbsolutePath(), new ElementStatus(f.getAbsolutePath(), ElementType.JAVA_FILE, ReverseStatus.REVERSE));
+                int result = reverseWizardView.open();
+                if (result == 0) {
+                    //set directory of scala sources (root folder form GitHub)
+                    if (sourcePathModel.isUsed())
+                        config.getSourcepath().add(sourcePathModel.getInitialDirectory());
+                    //set files to reverse
+                    for (File f : scalaFileChooserModel.getFilesToImport()) {
+                        if (f.isDirectory()) {
+                            config.getFilesToReverse().put(f.getAbsolutePath(), new ElementStatus(f.getAbsolutePath(), ElementType.DIRECTORY, ReverseStatus.REVERSE));
+                        } else {
+                            config.getFilesToReverse().put(f.getAbsolutePath(), new ElementStatus(f.getAbsolutePath(), ElementType.SCALA_FILE, ReverseStatus.REVERSE));
+                        }
                     }
-                }
-                //set compiler path
-                ScalaDesignerModule.logService.info("CompilerChooserModel files to import: "+compilerChooserModel.getFilesToImport());
-                config.setCompiler(compilerChooserModel.getFilesToImport().get(0));
-                ScalaDesignerModule.logService.info("Config: "+config.toString());
-                //========== Process Config ============================
+                    //set compiler path
+                    ScalaDesignerModule.logService.info("CompilerChooserModel files to import: " + compilerChooserModel.getFilesToImport());
+                    config.setCompiler(compilerChooserModel.getFilesToImport().get(0));
+                    ScalaDesignerModule.logService.info("Config: " + config.toString());
+                    //========== Process Config ============================
+                    if (processRun(config)) {
 
+                    }
+
+                }
 
             } catch (InvalidTransactionException e) {
                 // Error during the commit, the rollback is already done
@@ -112,7 +121,7 @@ public class Reversor {
             absolutePath = module.getConfiguration().getProjectSpacePath().toFile();
         } else
             absolutePath = new File(configuration.getParameterValue(ScalaDesignerParameters.SCALA_SOURCES));
-        ScalaDesignerModule.logService.info("createSourcePathModel path: "+absolutePath);
+        ScalaDesignerModule.logService.info("createSourcePathModel path: " + absolutePath);
         return new ScalaSourcePathModel(absolutePath);
     }
 
@@ -130,7 +139,7 @@ public class Reversor {
             absolutePath = module.getConfiguration().getProjectSpacePath().toFile();
         } else
             absolutePath = new File(configuration.getParameterValue(ScalaDesignerParameters.SCALA_COMPILER));
-        ScalaDesignerModule.logService.info("createCompilerChooserModel path: "+absolutePath);
+        ScalaDesignerModule.logService.info("createCompilerChooserModel path: " + absolutePath);
         return new FileChooserModel(absolutePath, extensions);
 
     }
@@ -142,5 +151,50 @@ public class Reversor {
         }
         return null;
     }
+
+    private boolean processRun(ReverseConfig config) {
+        try {
+            IProcessRunner processRunner = new ScalacProcessRunner(config.getCompiler(),
+                    getSourcesFilesToReverse(config));
+            ScalaDesignerModule.logService.info("Process scalac result:" +processRunner.run());
+            ScalaDesignerModule.logService.info(processRunner.getResultContent().toString());
+            ScalaDesignerModule.logService.error(processRunner.getErrorContent().toString());
+        } catch (Exception e) {
+            ScalaDesignerModule.logService.error(e);
+            return false;
+        }
+        return true;
+    }
+
+
+    //TODO: move to other class
+    private ArrayList<File> getSourcesFilesToReverse(ReverseConfig config) {
+        ArrayList<File> list = new ArrayList<> ();
+        ArrayList<ElementStatus> listToReverse = new ArrayList<> (config.getFilesToReverse().values ());
+        File fileToAdd;
+
+        for (ElementStatus eStatus : listToReverse) {
+            if (eStatus.getReverseStatus() == ReverseStatus.REVERSE &&
+                    !eStatus.getValue().endsWith(".class")) {
+                fileToAdd = new File(eStatus.getValue());
+                if (fileToAdd.isFile()) {
+                    if (!isInFileList(list, fileToAdd)) {
+                        list.add(fileToAdd);
+                    }
+                } else {
+                    List<File> tmpList= ScalaFileFinder.listJavaFilesRec(fileToAdd);
+                    tmpList.stream().filter(tmpFile -> !isInFileList(list, tmpFile)).forEach(list::add);
+                }
+            }
+        }
+        ScalaDesignerModule.logService.info("getSourcesFilesToReverse list:"+list.toString());
+        return list;
+    }
+
+
+    private boolean isInFileList(List<File> list, File file) {
+        return list.stream().anyMatch(f -> f.getAbsolutePath().equals(file.getAbsolutePath()));
+    }
+
 
 }
