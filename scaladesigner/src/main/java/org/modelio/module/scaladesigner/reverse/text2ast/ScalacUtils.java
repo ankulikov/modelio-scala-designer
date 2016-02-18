@@ -1,4 +1,4 @@
-package org.modelio.module.scaladesigner.reverse.process;
+package org.modelio.module.scaladesigner.reverse.text2ast;
 
 import java.io.File;
 import java.util.HashMap;
@@ -25,14 +25,13 @@ public class ScalacUtils {
             else break;
             if (scalacLine == null || scalacLine.isEmpty()) continue;
             resString = scalacLine;
-            System.out.println("ResFile: " + resFile + " ResString: " + resString);
             toReturn.put(resFile, resString);
         }
         return toReturn;
     }
 
     public static Map<File, List<String>> mapSourceAndErrors() {
-        return null;
+        return null; //TODO
     }
 
     private static String getShortNameFromSuccessOutput(String scalacLine) {

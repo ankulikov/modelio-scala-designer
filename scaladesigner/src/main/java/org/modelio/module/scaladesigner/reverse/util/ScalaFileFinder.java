@@ -1,4 +1,4 @@
-package org.modelio.module.scaladesigner.reverse.scalautil.io;
+package org.modelio.module.scaladesigner.reverse.util;
 
 import java.io.File;
 import java.io.FileFilter;

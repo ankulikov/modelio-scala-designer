@@ -1,0 +1,59 @@
+package org.modelio.module.scaladesigner.reverse.ast2modelio;
+
+import edu.kulikov.ast_parser.elements.AstElement;
+import edu.kulikov.ast_parser.elements.util.NoElement;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+
+//precondition: in transaction
+public class AstVisitor {
+    private List<IAstVisitHandler> handlers;
+    private AstElement astModel;
+    private Deque<Pair<AstElement,Integer>> stack; //element; children_position
+
+    public AstVisitor(AstElement astModel) {
+        this.astModel = astModel;
+        handlers = new ArrayList<>();
+        stack = new ArrayDeque<>();
+    }
+
+    public void addHandler(IAstVisitHandler handler) {
+        handlers.add(handler);
+    }
+
+    public void visit() {
+        //add root element (package) to stack
+        stack.add(new MutablePair<>(astModel, 0));
+        //manually handle it; root package doesn't have parent
+        callHandlers(astModel);
+        while (!stack.isEmpty()) {
+            //get reference to parent element
+            Pair<AstElement, Integer> currentPair = stack.peek();
+            Integer index = currentPair.getValue();
+            AstElement child = currentPair.getKey().get(index);
+            //if not all children are processed...
+            if (child != NoElement.instance()) {
+                //handle one child
+                callHandlers(child);
+                currentPair.setValue(index + 1);
+                //and go deeper
+                stack.push(new MutablePair<>(child, 0));
+            } else {
+                //all children are processed, remove reference to parent
+                stack.pop();
+            }
+        }
+    }
+
+    private void callHandlers(AstElement element) {
+       handlers.forEach(handler -> handler.onVisit(element));
+    }
+
+
+}

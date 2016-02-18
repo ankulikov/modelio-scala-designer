@@ -1,6 +1,11 @@
 package org.modelio.module.scaladesigner.reverse;
 
 import com.modelio.module.xmlreverse.IReportWriter;
+import edu.kulikov.ast_parser.AstElementEventHandler;
+import edu.kulikov.ast_parser.AstTreeParser;
+import edu.kulikov.ast_parser.elements.AstElement;
+import edu.kulikov.ast_parser.reader.ReaderConfig;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.swt.widgets.Display;
 import org.modelio.api.model.IModelingSession;
 import org.modelio.api.model.ITransaction;
@@ -14,19 +19,24 @@ import org.modelio.metamodel.uml.statik.Package;
 import org.modelio.module.scaladesigner.api.ScalaDesignerParameters;
 import org.modelio.module.scaladesigner.i18n.Messages;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.AstVisitor;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ElementCreatorFromAst;
 import org.modelio.module.scaladesigner.reverse.newwizard.ImageManager;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.IFileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.ISourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.filechooser.FileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.sourcepath.ScalaSourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.wizard.ScalaReverseWizardView;
-import org.modelio.module.scaladesigner.reverse.process.api.IProcessRunner;
-import org.modelio.module.scaladesigner.reverse.process.impl.ScalacProcessRunner;
-import org.modelio.module.scaladesigner.reverse.scalautil.io.ScalaFileFinder;
+import org.modelio.module.scaladesigner.reverse.text2ast.ScalacUtils;
+import org.modelio.module.scaladesigner.reverse.text2ast.api.ITextRunner;
+import org.modelio.module.scaladesigner.reverse.text2ast.impl.ScalacTextRunner;
+import org.modelio.module.scaladesigner.reverse.util.ScalaFileFinder;
 import org.modelio.module.scaladesigner.reverse.ui.ElementStatus;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.modelio.module.scaladesigner.reverse.ui.ElementStatus.ElementType;
 import static org.modelio.module.scaladesigner.reverse.ui.ElementStatus.ReverseStatus;
@@ -51,6 +61,7 @@ public class Reversor {
 
     private void reverse(final boolean withWizard) {
         final IModelingSession session = this.module.getModelingSession();
+        
         boolean error = false;
         File file;
         List<String> extensions = new ArrayList<>();
@@ -81,7 +92,7 @@ public class Reversor {
                 // =====================  Get Result From Wizard ==================================
                 int result = reverseWizardView.open();
                 if (result == 0) {
-                    //set directory of scala sources (root folder form GitHub)
+                    //set directory of scala sources (root folder from GitHub)
                     if (sourcePathModel.isUsed())
                         config.getSourcepath().add(sourcePathModel.getInitialDirectory());
                     //set files to reverse
@@ -98,7 +109,7 @@ public class Reversor {
                     ScalaDesignerModule.logService.info("Config: " + config.toString());
                     //========== Process Config ============================
                     if (processRun(config)) {
-
+                        transaction.commit();
                     }
 
                 }
@@ -154,11 +165,31 @@ public class Reversor {
 
     private boolean processRun(ReverseConfig config) {
         try {
-            IProcessRunner processRunner = new ScalacProcessRunner(config.getCompiler(),
-                    getSourcesFilesToReverse(config));
-            ScalaDesignerModule.logService.info("Process scalac result:" +processRunner.run());
-            ScalaDesignerModule.logService.info(processRunner.getResultContent().toString());
-            ScalaDesignerModule.logService.error(processRunner.getErrorContent().toString());
+
+            ArrayList<File> sourcesFilesToReverse = getSourcesFilesToReverse(config);
+            // ====== Get text Scala ASTs  ================
+            ScalaDesignerModule.logService.info("Get text Scala ASTs");
+            ITextRunner processRunner = new ScalacTextRunner(config.getCompiler(),
+                    sourcesFilesToReverse);
+            processRunner.run();
+            Map<File, String> map = ScalacUtils.mapSourceAndStringAst(sourcesFilesToReverse, processRunner.getResultContent());
+
+            // ====== Create models from Text ASTs ==========
+            ScalaDesignerModule.logService.info("Create models from Text ASTs");
+            List<AstElement> models =  new ArrayList<>();
+            AstTreeParser parser = new AstTreeParser(new ReaderConfig(true));
+            AstElementEventHandler defaultHandler = new AstElementEventHandler();
+            models.addAll(map.entrySet().stream().map(fileStringEntry -> parser.parse(IOUtils.toInputStream(fileStringEntry.getValue()), defaultHandler)).collect(Collectors.toList()));
+
+            //====== Transform models to Modelio =============
+            ScalaDesignerModule.logService.info("Transform models to Modelio");
+            IAstVisitHandler handler = new ElementCreatorFromAst(Modelio.getInstance().getModelingSession());
+            for (AstElement model : models) {
+                ScalaDesignerModule.logService.info("Transform model to Modelio");
+                AstVisitor visitor = new AstVisitor(model);
+                visitor.addHandler(handler);
+                visitor.visit();
+            }
         } catch (Exception e) {
             ScalaDesignerModule.logService.error(e);
             return false;

@@ -1,7 +1,7 @@
-package org.modelio.module.scaladesigner.reverse.process.impl;
+package org.modelio.module.scaladesigner.reverse.text2ast.impl;
 
 import org.apache.commons.io.IOUtils;
-import org.modelio.module.scaladesigner.reverse.process.api.IProcessRunner;
+import org.modelio.module.scaladesigner.reverse.text2ast.api.ITextRunner;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ScalacProcessRunner implements IProcessRunner {
+public class ScalacTextRunner implements ITextRunner {
 
     private static final List<String> defaultOptions
             = Arrays.asList("-Xprint:parser", "-Ystop-after:parser", "-Yshow-trees-compact");
@@ -19,7 +19,7 @@ public class ScalacProcessRunner implements IProcessRunner {
     private List<String> resultContent;
     private List<String> errorContent;
 
-    public ScalacProcessRunner(File pathToCompiler, List<File> sources) {
+    public ScalacTextRunner(File pathToCompiler, List<File> sources) {
         this.pathToCompiler = pathToCompiler;
         this.sources = sources;
     }
@@ -31,15 +31,10 @@ public class ScalacProcessRunner implements IProcessRunner {
         commands.addAll(defaultOptions);
 
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
-        try {
-            Process start = processBuilder.start();
-            resultContent = IOUtils.readLines(start.getInputStream(), "UTF-8");
-            errorContent = IOUtils.readLines(start.getErrorStream(), "UTF-8");
-
-            return start.waitFor();
-        } catch (IOException | InterruptedException e) {
-            throw e;
-        }
+        Process start = processBuilder.start();
+        resultContent = IOUtils.readLines(start.getInputStream(), "UTF-8");
+        errorContent = IOUtils.readLines(start.getErrorStream(), "UTF-8");
+        return start.waitFor();
     }
 
     @Override
