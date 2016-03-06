@@ -6,6 +6,7 @@ import edu.kulikov.ast_parser.AstTreeParser;
 import edu.kulikov.ast_parser.elements.AstElement;
 import edu.kulikov.ast_parser.reader.ReaderConfig;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.widgets.Display;
 import org.modelio.api.model.IModelingSession;
 import org.modelio.api.model.ITransaction;
@@ -80,6 +81,7 @@ public class Reversor {
                 } else {
                     config.setReverseRoot(getFirstRootPackage());
                 }
+                config.setReport(report);
                 // ==================== Create Wizard Models ==============================
                 String modulePath = module.getConfiguration().getModuleResourcesPath().toAbsolutePath().toString();
                 ImageManager.setModulePath(modulePath);
@@ -165,67 +167,18 @@ public class Reversor {
 
     private boolean processRun(ReverseConfig config) {
         try {
-
-            ArrayList<File> sourcesFilesToReverse = getSourcesFilesToReverse(config);
-            // ====== Get text Scala ASTs  ================
-            ScalaDesignerModule.logService.info("Get text Scala ASTs");
-            ITextRunner processRunner = new ScalacTextRunner(config.getCompiler(),
-                    sourcesFilesToReverse);
-            processRunner.run();
-            Map<File, String> map = ScalacUtils.mapSourceAndStringAst(sourcesFilesToReverse, processRunner.getResultContent());
-
-            // ====== Create models from Text ASTs ==========
-            ScalaDesignerModule.logService.info("Create models from Text ASTs");
-            List<AstElement> models =  new ArrayList<>();
-            AstTreeParser parser = new AstTreeParser(new ReaderConfig(true));
-            AstElementEventHandler defaultHandler = new AstElementEventHandler();
-            models.addAll(map.entrySet().stream().map(fileStringEntry -> parser.parse(IOUtils.toInputStream(fileStringEntry.getValue()), defaultHandler)).collect(Collectors.toList()));
-
-            //====== Transform models to Modelio =============
-            ScalaDesignerModule.logService.info("Transform models to Modelio");
-            IAstVisitHandler handler = new ElementCreatorFromAst(Modelio.getInstance().getModelingSession());
-            for (AstElement model : models) {
-                ScalaDesignerModule.logService.info("Transform model to Modelio");
-                AstVisitor visitor = new AstVisitor(model);
-                visitor.addHandler(handler);
-                visitor.visit();
-            }
+            ProgressMonitorDialog dialog = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+            dialog.open();
+            dialog.run(true, true, new ReverseProgressTask(module, config));
+            return true;
         } catch (Exception e) {
             ScalaDesignerModule.logService.error(e);
             return false;
         }
-        return true;
     }
 
 
-    //TODO: move to other class
-    private ArrayList<File> getSourcesFilesToReverse(ReverseConfig config) {
-        ArrayList<File> list = new ArrayList<> ();
-        ArrayList<ElementStatus> listToReverse = new ArrayList<> (config.getFilesToReverse().values ());
-        File fileToAdd;
 
-        for (ElementStatus eStatus : listToReverse) {
-            if (eStatus.getReverseStatus() == ReverseStatus.REVERSE &&
-                    !eStatus.getValue().endsWith(".class")) {
-                fileToAdd = new File(eStatus.getValue());
-                if (fileToAdd.isFile()) {
-                    if (!isInFileList(list, fileToAdd)) {
-                        list.add(fileToAdd);
-                    }
-                } else {
-                    List<File> tmpList= ScalaFileFinder.listJavaFilesRec(fileToAdd);
-                    tmpList.stream().filter(tmpFile -> !isInFileList(list, tmpFile)).forEach(list::add);
-                }
-            }
-        }
-        ScalaDesignerModule.logService.info("getSourcesFilesToReverse list:"+list.toString());
-        return list;
-    }
-
-
-    private boolean isInFileList(List<File> list, File file) {
-        return list.stream().anyMatch(f -> f.getAbsolutePath().equals(file.getAbsolutePath()));
-    }
 
 
 }

@@ -15,7 +15,7 @@ public class ScalaFileFinder {
      * @param directory the directory to look into.
      * @return All found .scala files.
      */
-    public static List<File> listJavaFilesRec(File directory) {
+    public static List<File> listScalaFilesRec(File directory) {
         return listFileRec(directory, new ScalaFileFilterImpl());
     }
 

@@ -24,7 +24,7 @@ public class ScalacTextRunner implements ITextRunner {
         this.sources = sources;
     }
 
-    public int run() throws Exception {
+    public int run() throws IOException, InterruptedException {
         List<String> commands = new ArrayList<String>();
         commands.add(pathToCompiler.getAbsolutePath());
         commands.addAll(sources.stream().map(File::getAbsolutePath).collect(Collectors.toList()));
