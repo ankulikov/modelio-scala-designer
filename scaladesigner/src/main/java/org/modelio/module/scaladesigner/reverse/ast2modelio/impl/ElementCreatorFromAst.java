@@ -1,36 +1,38 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.impl;
 
-import edu.kulikov.ast_parser.elements.AstElement;
-import edu.kulikov.ast_parser.elements.ClassDef;
-import edu.kulikov.ast_parser.elements.PackageDef;
+import edu.kulikov.ast_parser.elements.*;
+import edu.kulikov.ast_parser.elements.util.AstTraverser;
+import edu.kulikov.ast_parser.elements.util.NoElement;
 import org.modelio.api.model.IModelingSession;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.mda.Project;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
+import org.modelio.metamodel.uml.statik.*;
 import org.modelio.metamodel.uml.statik.Class;
-import org.modelio.metamodel.uml.statik.NameSpace;
 import org.modelio.metamodel.uml.statik.Package;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.Ast2ModelioRepo;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ElementFactory;
 import org.modelio.vcore.smkernel.mapi.MObject;
 
 /**
  * Converts {@link AstElement}s into {@link ModelElement}s
  */
 public class ElementCreatorFromAst implements IAstVisitHandler {
-    private final IModelingSession session;
-    private final IUmlModel factory;
+    private final ElementFactory factory;
+    private final IUmlModel model;
     private final Ast2ModelioRepo repo;
 
     public ElementCreatorFromAst(IModelingSession session) {
-        this.session = session;
-        this.factory = session.getModel();
+        this.model = session.getModel();
+        this.factory = new ElementFactory(model);
         this.repo = Ast2ModelioRepo.getInstance();
+
     }
 
     public Package getModelRoot() {
-        for (MObject mObject : factory.getModelRoots()) {
+        for (MObject mObject : model.getModelRoots()) {
             if (mObject instanceof Project) {
                 return ((Project) mObject).getModel();
             }
@@ -39,13 +41,15 @@ public class ElementCreatorFromAst implements IAstVisitHandler {
     }
 
     @Override
-    public void onVisit(AstElement astElement) {
+    public void onStartVisit(AstElement astElement) {
         ModelElement element = null;
         if (astElement instanceof PackageDef) {
             //Package is the only type which can be top-level => then use getModelRoot()
-            element = createPackage(astElement, astElement.getParent() == null ? getModelRoot() : repo.get(astElement.getParent()));
+            element = factory.createPackage((PackageDef) astElement, astElement.getParent() == NoElement.instance() ? getModelRoot() : repo.get(astElement.getParent()));
         } else if (astElement instanceof ClassDef) {
-            element = createClass(astElement, repo.get(astElement.getParent()));
+            element = factory.createClass((ClassDef) astElement, repo.get(astElement.getParent()));
+        } else if (astElement instanceof DefDef) {
+            element = factory.createOperation((DefDef) astElement, repo.get(parent(astElement, ClassDef.class)));
         }
         else {
             ScalaDesignerModule.logService.warning("Unknown AstElement: " + astElement);
@@ -54,13 +58,12 @@ public class ElementCreatorFromAst implements IAstVisitHandler {
             repo.save(astElement, element);
     }
 
-    public Package createPackage(AstElement packageDef, ModelElement owner) {
-        ScalaDesignerModule.logService.info("Create package: "+packageDef+" owner: "+owner);
-        return factory.createPackage(((PackageDef) packageDef).getName(), (NameSpace) owner);
+    @Override
+    public void onEndVisit(AstElement element) {
+
     }
 
-    public Class createClass(AstElement classDef, ModelElement owner) {
-        ScalaDesignerModule.logService.info("Create classDef: "+classDef+" owner: "+owner);
-        return factory.createClass(((ClassDef) classDef).getName(), (NameSpace) owner);
+    public static AstElement parent(AstElement element, java.lang.Class<? extends AstElement> type) {
+        return AstTraverser.getParentByType(element, type);
     }
 }

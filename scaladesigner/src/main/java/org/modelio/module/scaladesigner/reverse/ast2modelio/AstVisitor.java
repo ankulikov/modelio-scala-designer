@@ -31,7 +31,7 @@ public class AstVisitor {
         //add root element (package) to stack
         stack.add(new MutablePair<>(astModel, 0));
         //manually handle it; root package doesn't have parent
-        callHandlers(astModel);
+        onStart(astModel);
         while (!stack.isEmpty()) {
             //get reference to parent element
             Pair<AstElement, Integer> currentPair = stack.peek();
@@ -40,20 +40,27 @@ public class AstVisitor {
             //if not all children are processed...
             if (child != NoElement.instance()) {
                 //handle one child
-                callHandlers(child);
+                onStart(child);
                 currentPair.setValue(index + 1);
                 //and go deeper
                 stack.push(new MutablePair<>(child, 0));
             } else {
                 //all children are processed, remove reference to parent
-                stack.pop();
+                //and say goodbye...
+                onEnd(stack.pop().getKey());
             }
         }
     }
 
-    private void callHandlers(AstElement element) {
-       handlers.forEach(handler -> handler.onVisit(element));
+    private void onStart(AstElement element) {
+       handlers.forEach(handler -> handler.onStartVisit(element));
     }
+
+    private void onEnd(AstElement element) {
+        handlers.forEach(handler -> handler.onEndVisit(element));
+    }
+
+
 
 
 }
