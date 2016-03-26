@@ -10,14 +10,19 @@ import org.modelio.metamodel.uml.statik.Class;
 import org.modelio.metamodel.uml.statik.*;
 import org.modelio.metamodel.uml.statik.Package;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.Ast2ModelioRepo;
 
 public class ElementFactory {
 
     private final IUmlModel factory;
+    private Ast2ModelioRepo repo;
 
-    public ElementFactory(IUmlModel factory) {
+    public ElementFactory(IUmlModel factory, Ast2ModelioRepo repo) {
         this.factory = factory;
+        this.repo = repo;
     }
+
+    //TODO: use repo to get owner!
 
     public Package createPackage(PackageDef packageDef, ModelElement owner) {
         ScalaDesignerModule.logService.info("Create package: " + packageDef + " owner: " + owner);
@@ -41,5 +46,16 @@ public class ElementFactory {
         //TODO: set return type (all classes must be visited before)
 
         return operation;
+    }
+
+    public Attribute createField(ValDef valDef, ModelElement owner) {
+        Attribute attribute = factory.createAttribute();
+        attribute.setOwner((Classifier) owner);
+        attribute.setName(valDef.getName());
+        //TODO: set value of field (initializer)?
+        //attribute.setValue();
+        //TODO: set type of field (all classes must be visited before)
+        //attribute.setType();
+        return attribute;
     }
 }

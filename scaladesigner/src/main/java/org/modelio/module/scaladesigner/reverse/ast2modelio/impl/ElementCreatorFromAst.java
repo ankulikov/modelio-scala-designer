@@ -7,22 +7,24 @@ import org.modelio.api.model.IModelingSession;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.mda.Project;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
-import org.modelio.metamodel.uml.statik.*;
-import org.modelio.metamodel.uml.statik.Class;
 import org.modelio.metamodel.uml.statik.Package;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.Ast2ModelioRepo;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContextable;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ElementFactory;
 import org.modelio.vcore.smkernel.mapi.MObject;
 
 /**
  * Converts {@link AstElement}s into {@link ModelElement}s
  */
-public class ElementCreatorFromAst implements IAstVisitHandler {
+public class ElementCreatorFromAst implements IAstVisitHandler, IContextable {
     private final ElementFactory factory;
     private final IUmlModel model;
     private final Ast2ModelioRepo repo;
+
+    private IContext context;
 
     public ElementCreatorFromAst(IModelingSession session) {
         this.model = session.getModel();
@@ -50,6 +52,9 @@ public class ElementCreatorFromAst implements IAstVisitHandler {
             element = factory.createClass((ClassDef) astElement, repo.get(astElement.getParent()));
         } else if (astElement instanceof DefDef) {
             element = factory.createOperation((DefDef) astElement, repo.get(parent(astElement, ClassDef.class)));
+        } else if (astElement instanceof ValDef) {
+            //TODO: check that it is field
+            element = factory.createField((ValDef) astElement, repo.get(parent(astElement, ClassDef.class)));
         }
         else {
             ScalaDesignerModule.logService.warning("Unknown AstElement: " + astElement);
@@ -65,5 +70,10 @@ public class ElementCreatorFromAst implements IAstVisitHandler {
 
     public static AstElement parent(AstElement element, java.lang.Class<? extends AstElement> type) {
         return AstTraverser.getParentByType(element, type);
+    }
+
+    @Override
+    public void setContext(IContext context) {
+        this.context = context;
     }
 }

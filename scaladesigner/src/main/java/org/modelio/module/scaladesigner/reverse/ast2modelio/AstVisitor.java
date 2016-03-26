@@ -5,6 +5,9 @@ import edu.kulikov.ast_parser.elements.util.NoElement;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContextable;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.Context;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -15,12 +18,14 @@ import java.util.List;
 public class AstVisitor {
     private List<IAstVisitHandler> handlers;
     private AstElement astModel;
-    private Deque<Pair<AstElement,Integer>> stack; //element; children_position
+    private Deque<Pair<AstElement, Integer>> stack; //element; children_position
+    private IContext context;
 
     public AstVisitor(AstElement astModel) {
         this.astModel = astModel;
         handlers = new ArrayList<>();
         stack = new ArrayDeque<>();
+        context = new Context();
     }
 
     public void addHandler(IAstVisitHandler handler) {
@@ -53,14 +58,15 @@ public class AstVisitor {
     }
 
     private void onStart(AstElement element) {
-       handlers.forEach(handler -> handler.onStartVisit(element));
+        handlers.stream().forEach(h -> {
+            if (h instanceof IContextable) ((IContextable) h).setContext(context);
+            h.onStartVisit(element);
+        });
     }
 
     private void onEnd(AstElement element) {
         handlers.forEach(handler -> handler.onEndVisit(element));
     }
-
-
 
 
 }
