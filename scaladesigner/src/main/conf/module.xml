@@ -12,7 +12,7 @@
         <PathEntry path="lib/slf4j-api-1.7.13.jar"/>
     </ClassPath>
     <Profiles>
-        <Profile uid="2a24a8f8-de64-423c-86f1-e4b6070713a3" id="TestArchetypeProfile">
+        <Profile uid="2a24a8f8-de64-423c-86f1-e4b6070713a3" id="ScalaExtensions">
             <Stereotype name="stereotype1" metaclass="Class" is-hidden="false" label="Stereotype 1" uid="c584d0e3-12f4-4ae0-a76b-09779e08df96">
                 <Icon path="res/icons/Stereotype1_16.png"/>
                 <Image path="res/icons/Stereotype1_48.png"/>
@@ -20,6 +20,11 @@
             <Stereotype name="stereotype2" metaclass="ClassDiagram" is-hidden="false" label="Stereotype 2" uid="b4ba9f70-8c48-49cf-af6a-635b3aea0faa">
                 <Icon path="res/icons/Stereotype2_16.png"/>
                 <Image path="res/icons/Stereotype2_16.png"/>
+            </Stereotype>
+            <Stereotype name="ScalaVisibility" metaclass="Constraint" is-hidden="false" label="Visibility" uid="76316380-2a8f-40b0-91bb-dbca6306eb9f">
+                <Icon path=""/>
+                <Image path=""/>
+                <TagTypes/>
             </Stereotype>
             <MetaclassReference uid="4628c444-321d-488a-b8e2-1cf854132554" metaclass="ModelElement">
                 <TagTypes>
