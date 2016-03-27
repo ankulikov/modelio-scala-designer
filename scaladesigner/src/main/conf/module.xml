@@ -8,7 +8,7 @@
         <PathEntry path="lib/commons-lang3-3.1.jar"/>
         <PathEntry path="lib/commons-io-2.4.jar"/>
         <PathEntry path="lib/guava-19.0.jar"/>
-        <PathEntry path="lib/scala-ast-parser-0.8.jar"/>
+        <PathEntry path="lib/scala-ast-parser-0.9.jar"/>
         <PathEntry path="lib/slf4j-api-1.7.13.jar"/>
     </ClassPath>
     <Profiles>
@@ -29,6 +29,14 @@
             <MetaclassReference uid="4628c444-321d-488a-b8e2-1cf854132554" metaclass="ModelElement">
                 <TagTypes>
                     <TagType name="TagName" uid="5a87515d-cc02-4d7c-91a6-b33060c5f63c" label="Name" parameter-card="1" is-hidden="false" is-signed="false"/>
+                </TagTypes>
+            </MetaclassReference>
+            <MetaclassReference uid="05039ad7-8443-420f-958e-02a76d1ffd95" metaclass="Attribute">
+                <TagTypes>
+                    <TagType name="ScalaLazy" uid="5a2b1d75-cc12-4e8f-a059-1376821960f2" label="Lazy" parameter-card="0" is-hidden="false" is-signed="false"/>
+                    <TagType name="ScalaImplicit" uid="f2c074f0-c70a-44e3-90d6-1d58e1d4194c" label="Implicit" parameter-card="0" is-hidden="false" is-signed="false"/>
+                    <TagType name="ScalaFinal" uid="9f62f2c7-ac17-44f5-86f5-842d5d7d4b8e" label="Final" parameter-card="0" is-hidden="false" is-signed="false"/>
+                    <TagType name="ScalaOverride" uid="39cf820b-ea0d-4b3f-9fd8-89a7457d790b" label="Override" parameter-card="0" is-hidden="false" is-signed="false"/>
                 </TagTypes>
             </MetaclassReference>
         </Profile>
