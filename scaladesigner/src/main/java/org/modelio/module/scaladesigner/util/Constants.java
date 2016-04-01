@@ -7,4 +7,5 @@ public interface Constants {
     String TAG_SEALED = "ScalaSealed";
     String TAG_IMPLICIT = "ScalaImplicit";
     String TAG_OVERRIDE = "ScalaOverride";
+    String TAG_MUTABLE = "ScalaMutable";
 }

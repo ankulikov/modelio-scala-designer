@@ -26,17 +26,31 @@
                 <Image path=""/>
                 <TagTypes/>
             </Stereotype>
-            <MetaclassReference uid="4628c444-321d-488a-b8e2-1cf854132554" metaclass="ModelElement">
-                <TagTypes>
-                    <TagType name="TagName" uid="5a87515d-cc02-4d7c-91a6-b33060c5f63c" label="Name" parameter-card="1" is-hidden="false" is-signed="false"/>
-                </TagTypes>
-            </MetaclassReference>
             <MetaclassReference uid="05039ad7-8443-420f-958e-02a76d1ffd95" metaclass="Attribute">
                 <TagTypes>
                     <TagType name="ScalaLazy" uid="5a2b1d75-cc12-4e8f-a059-1376821960f2" label="Lazy" parameter-card="0" is-hidden="false" is-signed="false"/>
                     <TagType name="ScalaImplicit" uid="f2c074f0-c70a-44e3-90d6-1d58e1d4194c" label="Implicit" parameter-card="0" is-hidden="false" is-signed="false"/>
                     <TagType name="ScalaFinal" uid="9f62f2c7-ac17-44f5-86f5-842d5d7d4b8e" label="Final" parameter-card="0" is-hidden="false" is-signed="false"/>
                     <TagType name="ScalaOverride" uid="39cf820b-ea0d-4b3f-9fd8-89a7457d790b" label="Override" parameter-card="0" is-hidden="false" is-signed="false"/>
+                    <TagType name="ScalaMutable" uid="64d3a1bb-58bd-47ba-9153-b54ebaa3e4f0" label="Mutable" parameter-card="0" is-hidden="false" is-signed="true"/>
+                </TagTypes>
+            </MetaclassReference>
+            <MetaclassReference uid="381a184a-df92-4748-a943-7c2b83526419" metaclass="Operation">
+                <TagTypes>
+                    <TagType name="ScalaFinal" uid="903aeab3-b427-4e68-a00b-258a3b5a32b8" label="Final" parameter-card="0" is-hidden="true" is-signed="false"/>
+                    <TagType name="ScalaImplicit" uid="132b3677-e40a-406e-be6c-869c67473df0" label="Implicit" parameter-card="0" is-hidden="true" is-signed="false"/>
+                    <TagType name="ScalaOverride" uid="fc7d1428-e16a-4e2c-a958-63b3c1e0cd1c" label="Override" parameter-card="0" is-hidden="true" is-signed="false"/>
+                </TagTypes>
+            </MetaclassReference>
+            <MetaclassReference uid="f6b9b77a-5536-4176-a298-e77b2bb9c145" metaclass="Parameter">
+                <TagTypes>
+                    <TagType name="ScalaImplicit" uid="ec23faad-7b8c-4c24-b26c-46ad655ca9a3" label="Implicit" parameter-card="0" is-hidden="false" is-signed="false"/>
+                </TagTypes>
+            </MetaclassReference>
+            <MetaclassReference uid="d53ffa3c-c6bf-4bad-8f2c-77b282561859" metaclass="Class">
+                <TagTypes>
+                    <TagType name="ScalaFinal" uid="91d6d4d0-fe1e-4b24-95e4-0c24bd32731c" label="Final" parameter-card="0" is-hidden="false" is-signed="false"/>
+                    <TagType name="ScalaSealed" uid="7ebf294d-bf22-4092-b6c8-b13e49b821e6" label="Sealed" parameter-card="0" is-hidden="false" is-signed="false"/>
                 </TagTypes>
             </MetaclassReference>
         </Profile>

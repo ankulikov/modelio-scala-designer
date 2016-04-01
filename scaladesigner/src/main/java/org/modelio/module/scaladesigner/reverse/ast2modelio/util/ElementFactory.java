@@ -1,7 +1,6 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.util;
 
 import edu.kulikov.ast_parser.elements.*;
-import edu.kulikov.ast_parser.elements.Constants;
 import edu.kulikov.ast_parser.elements.util.AstTraverser;
 import edu.kulikov.ast_parser.elements.util.NoElement;
 import org.modelio.api.model.IUmlModel;
@@ -12,11 +11,9 @@ import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.metamodel.uml.statik.*;
 import org.modelio.metamodel.uml.statik.Class;
 import org.modelio.metamodel.uml.statik.Package;
-import org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.Ast2ModelioRepo;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
-import org.modelio.module.scaladesigner.util.*;
 import org.modelio.vcore.smkernel.mapi.MObject;
 
 import java.util.List;
@@ -58,7 +55,11 @@ public class ElementFactory {
     public Class createClass(ClassDef classDef, IContext context) {
         ModelElement owner = repo.get(classDef.getParent());
         ScalaDesignerModule.logService.info("Create classDef: " + classDef + " owner: " + owner);
-        return model.createClass(classDef.getIdentifier(), (NameSpace) owner);
+        Class aClass = model.createClass(classDef.getIdentifier(), (NameSpace) owner);
+        setVisibility(aClass, classDef.getModifiers());
+        putModifierTags(aClass, classDef.getModifiers());
+
+        return aClass;
     }
 
     public Operation createOperation(DefDef defDef, IContext context) {
@@ -73,7 +74,8 @@ public class ElementFactory {
             parameter.setComposed(operation);
         }
         //TODO: set return type (all classes must be visited before)
-        setVisibilityForMember(operation, defDef.getModifiers());
+        setVisibility(operation, defDef.getModifiers());
+        putModifierTags(operation, defDef.getModifiers());
         return operation;
     }
 
@@ -88,13 +90,13 @@ public class ElementFactory {
         //attribute.setValue();
         //TODO: set type of field (all classes must be visited before)
         //attribute.setType();
-        setVisibilityForMember(attribute, valDef.getModifiers());
+        setVisibility(attribute, valDef.getModifiers());
         putModifierTags(attribute, valDef.getModifiers());
 
         return attribute;
     }
 
-    private void setVisibilityForMember(Feature owner, Modifiers modifiers) {
+    private void setVisibility(ModelElement owner, Modifiers modifiers) {
         //TODO: read about modifies
         //http://alvinalexander.com/scala/how-to-control-scala-method-scope-object-private-package
         List<String> values = modifiers.getValues();
@@ -118,7 +120,10 @@ public class ElementFactory {
             }
         }
         if (modifier != null) {
-            owner.setVisibility(modifier);
+            if (owner instanceof Feature)
+                ((Feature) owner).setVisibility(modifier);
+            else if (owner instanceof NameSpace)
+                ((NameSpace) owner).setVisibility(modifier);
         }
     }
 
@@ -129,6 +134,8 @@ public class ElementFactory {
                     case Constants.FINAL:
                         ModelUtils.setTaggedValue(model, element, MODULE_NAME,
                                 org.modelio.module.scaladesigner.util.Constants.TAG_FINAL, true);
+                        if (element instanceof NameSpace)
+                            ((NameSpace) element).setIsLeaf(true);
                         break;
                     case Constants.SEALED:
                         ModelUtils.setTaggedValue(model, element, MODULE_NAME,
@@ -145,6 +152,17 @@ public class ElementFactory {
                     case Constants.OVERRIDE:
                         ModelUtils.setTaggedValue(model, element, MODULE_NAME,
                                 org.modelio.module.scaladesigner.util.Constants.TAG_OVERRIDE, true);
+                        break;
+                    case Constants.MUTABLE:
+                        ModelUtils.setTaggedValue(model, element, MODULE_NAME,
+                                org.modelio.module.scaladesigner.util.Constants.TAG_MUTABLE, true);
+                        break;
+                    case Constants.ABSTRACT:
+                    case Constants.DEFERRED:
+                        if (element instanceof Feature)
+                            ((Feature) element).setIsAbstract(true);
+                        else if (element instanceof NameSpace)
+                            ((NameSpace) element).setIsAbstract(true);
                         break;
                 }
             } catch (ExtensionNotFoundException e) {
