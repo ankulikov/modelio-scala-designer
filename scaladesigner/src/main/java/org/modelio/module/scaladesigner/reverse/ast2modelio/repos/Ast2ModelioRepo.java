@@ -2,15 +2,17 @@ package org.modelio.module.scaladesigner.reverse.ast2modelio.repos;
 
 import edu.kulikov.ast_parser.elements.AstElement;
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IRepository;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Ast2ModelioRepo implements Repository{
+public class Ast2ModelioRepo implements IRepository {
     private static Ast2ModelioRepo instance;
-    private Map<AstElement, MutablePair<Status, ModelElement>> cache;
+    private Map<AstElement, Pair<Status, ModelElement>> cache;
 
     // private BiMap<AstElement, ModelElement> cache;
 
@@ -25,7 +27,7 @@ public class Ast2ModelioRepo implements Repository{
     }
 
     public void save(AstElement from, ModelElement to) {
-        save(from, to, Status.ONLY_NAME);
+        save(from, to, Status.REVERSE_ONLY_NAME);
     }
 
     public void save(AstElement from, Status status) {
@@ -36,7 +38,7 @@ public class Ast2ModelioRepo implements Repository{
         if (from == null | to == null)
             throw new IllegalArgumentException("Source or target elements can't be null");
         if (cache.containsKey(from)) {
-            MutablePair<Status, ModelElement> pair = cache.get(from);
+            MutablePair<Status, ModelElement> pair = (MutablePair<Status, ModelElement>) cache.get(from);
             if (!status.equals(pair.getLeft()))
                 pair.setLeft(status);
             if (!to.equals(pair.getRight()))
@@ -47,24 +49,26 @@ public class Ast2ModelioRepo implements Repository{
     }
 
     public ModelElement get(AstElement key) {
-        if (key == null) return null;
-        ModelElement right = cache.get(key).getRight();
-//        if (right != null && right.isDeleted()) {
-//            cache.remove(key); //if someone
-//        }
+        if (key == null || !cache.containsKey(key)) return null;
         return cache.get(key).getRight();
     }
 
+    public Status getStatus(AstElement key) {
+        if (!cache.containsKey(key))
+            return Status.NOT_REVERSED;
+        return cache.get(key).getKey();
+    }
+
     public void clear() {
-        //TODO: check if delete causes exception
         cache.forEach((key,value)-> ModelUtils.deleteElement(value.getRight()));
         cache.clear();
     }
 
-    enum Status {
-        ONLY_NAME,
-        FULL_SIGNATURE,
-        WITH_DEPENDENCIES
+    public enum Status {
+        NOT_REVERSED,
+        REVERSE_ONLY_NAME,
+        REVERSE_FULL_SIGNATURE,
+        REVERSE_WITH_RELATIONS
     }
 
     static class MapInfo {

@@ -1,12 +1,12 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.repos;
 
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IRepository;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
-import org.modelio.vcore.smkernel.mapi.MObject;
 
 import java.util.*;
 
-public class IdentifierRepo implements Repository {
+public class IdentifierRepo implements IRepository {
     private static IdentifierRepo instance;
     //simple identifier - name without dots
     private Map<String, Set<ModelElement>> simpleIdentifiers;
@@ -32,11 +32,17 @@ public class IdentifierRepo implements Repository {
                 element);
     }
 
-    public Set<ModelElement> getByFullIdentifier(String fullIdentifier) {
+    public Set<ModelElement> getByIdentifier(String identifier) {
+        if (identifier.contains("."))
+            return getByFullIdentifier(identifier);
+        return getBySimpleIdentifier(identifier);
+    }
+
+    private Set<ModelElement> getByFullIdentifier(String fullIdentifier) {
         return Collections.unmodifiableSet(fullIdentifiers.get(fullIdentifier));
     }
 
-    public Set<ModelElement> getBySimpleIdentifier(String simpleIdentifier) {
+    private Set<ModelElement> getBySimpleIdentifier(String simpleIdentifier) {
         return Collections.unmodifiableSet(fullIdentifiers.get(simpleIdentifier));
     }
 
@@ -44,7 +50,6 @@ public class IdentifierRepo implements Repository {
 //    public Set<ModelElement> getBySimpleIdentifier(String simpleIdentifier, Set<String> scope) {
 //
 //    }
-
 
 
     private void checkAndSave(Map<String, Set<ModelElement>> map,
@@ -62,7 +67,7 @@ public class IdentifierRepo implements Repository {
 
     @Override
     public void clear() {
-        fullIdentifiers.forEach((key, list)->list.forEach(ModelUtils::deleteElement));
+        fullIdentifiers.forEach((key, list) -> list.forEach(ModelUtils::deleteElement));
         fullIdentifiers.clear();
         simpleIdentifiers.clear();
     }

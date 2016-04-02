@@ -9,7 +9,9 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRep
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContextable;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ElementFactory;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.factory.ElementFactory;
+
+import static org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo.Status.REVERSE_FULL_SIGNATURE;
 
 /**
  * Converts {@link AstElement}s into {@link ModelElement}s
@@ -17,13 +19,14 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ElementFactory;
 public class ElementCreatorFromAstHandler implements IAstVisitHandler, IContextable {
     private final ElementFactory factory;
     private final Ast2ModelioRepo repo;
+    private final IUmlModel model;
 
     private IContext context;
 
     public ElementCreatorFromAstHandler(IModelingSession session) {
-        IUmlModel model = session.getModel();
+        this.model = session.getModel();
         this.repo = Ast2ModelioRepo.getInstance();
-        this.factory = new ElementFactory(model, repo);
+        this.factory = new ElementFactory();
     }
 
 
@@ -32,23 +35,12 @@ public class ElementCreatorFromAstHandler implements IAstVisitHandler, IContexta
     public void onStartVisit(AstElement astElement) {
         if (context == null)
             throw new IllegalArgumentException("Context was not initialized!");
-        ModelElement element = null;
-        if (astElement instanceof PackageDef) {
-            //Package is the only type which can be top-level => then use getModelRoot()
-            element = factory.createPackage((PackageDef) astElement, context);
-        } else if (astElement instanceof ClassDef) {
-            element = factory.createClass((ClassDef) astElement, context);
-        } else if (astElement instanceof DefDef) {
-            element = factory.createOperation((DefDef) astElement, context);
-
-        } else if (astElement instanceof ValDef) {
-            element = factory.createVariable((ValDef) astElement, context);
-        }
-        else {
+        ModelElement element = factory.createElement(astElement, model, context, true);
+        if (element != null) {
+            repo.save(astElement, element, REVERSE_FULL_SIGNATURE);
+        } else {
             ScalaDesignerModule.logService.warning("Unknown AstElement: " + astElement);
         }
-        if (element != null)
-            repo.save(astElement, element);
     }
 
     @Override
