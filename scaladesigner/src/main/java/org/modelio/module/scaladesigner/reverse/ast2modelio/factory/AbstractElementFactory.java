@@ -116,23 +116,10 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
         }
     }
 
-    String prefix(String fullString, String suffix) {
-        return fullString.substring(0,fullString.lastIndexOf(suffix));
+    void saveInIdentRepo(ModelElement element, String fullIdent) {
+        ScalaDesignerModule.logService.info("Save in ident repo: name="+fullIdent+", element="+element);
+        identRepo.save(fullIdent, element);
     }
 
-    private String beforeFirst(String string, char symbol) {
-        return string.substring(0, string.indexOf(symbol));
-    }
 
-    private String afterFirst(String string, char symbol) {
-        return string.substring(string.indexOf(symbol)+1);
-    }
-
-     String beforeFirstDot(String string) {
-        return beforeFirst(string,'.');
-    }
-
-     String afterFirstDot(String string) {
-        return afterFirst(string, '.');
-    }
 }

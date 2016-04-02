@@ -17,7 +17,7 @@ public class ClassFactory extends AbstractElementFactory<ClassDef, Class> {
         Class aClass = model.createClass(classDef.getIdentifier(), (NameSpace) owner);
         setVisibility(aClass, classDef.getModifiers(), model);
         putModifierTags(aClass, classDef.getModifiers(), model);
-
+        saveInIdentRepo(aClass, classDef.getFullIdentifier());
         return aClass;
     }
 }

@@ -27,6 +27,7 @@ public class OperationFactory extends AbstractElementFactory<DefDef, Operation> 
         //TODO: set return type (all classes must be visited before)
         setVisibility(operation, defDef.getModifiers(), model);
         putModifierTags(operation, defDef.getModifiers(), model);
+        saveInIdentRepo(operation, defDef.getFullIdentifier());
         return operation;
     }
 }

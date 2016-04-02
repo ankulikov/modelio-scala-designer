@@ -12,6 +12,9 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.vcore.smkernel.mapi.MObject;
 
 import static org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo.Status.NOT_REVERSED;
+import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUtils.afterFirstDot;
+import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUtils.beforeFirstDot;
+import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUtils.prefix;
 
 public class PackageFactory extends AbstractElementFactory<PackageDef, Package> {
 
@@ -22,6 +25,7 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
             ModelElement owner = from.getParent() == NoElement.instance() ? getModelRoot(model) : transformRepo.get(from.getParent());
             ScalaDesignerModule.logService.info("Create package: " + from + " owner: " + owner);
             toReturn = createPackageRecursive(model, owner, prefix(from.getFullIdentifier(), from.getIdentifier()), from.getIdentifier());
+            saveInIdentRepo(toReturn, from.getFullIdentifier());
         } else {
             //may be some additional info for packages?
             toReturn = (Package) transformRepo.get(from);
@@ -44,9 +48,11 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
             Package modelPackage = model.createPackage(simpleName, (NameSpace) owner);
             return modelPackage;
         } else {
-            Package modelPackage = model.createPackage(beforeFirstDot(simpleName), (NameSpace) owner);
+            String nameBeforeFirstDot = beforeFirstDot(simpleName);
+            Package modelPackage = model.createPackage(nameBeforeFirstDot, (NameSpace) owner);
+            //save intermediate packages
+            saveInIdentRepo(modelPackage, namePrefix+'.'+nameBeforeFirstDot);
             return createPackageRecursive(model, modelPackage, namePrefix, afterFirstDot(simpleName));
         }
-        //TODO: save simpleName in repo
     }
 }

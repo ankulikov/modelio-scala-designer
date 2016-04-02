@@ -23,7 +23,7 @@ public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
         //attribute.setType();
         setVisibility(attribute, valDef.getModifiers(), model);
         putModifierTags(attribute, valDef.getModifiers(), model);
-
+        saveInIdentRepo(attribute, valDef.getFullIdentifier());
         return attribute;
     }
 }
