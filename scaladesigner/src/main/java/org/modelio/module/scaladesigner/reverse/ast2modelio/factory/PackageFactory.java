@@ -21,7 +21,7 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
         if (transformRepo.getStatus(from) == NOT_REVERSED) {
             ModelElement owner = from.getParent() == NoElement.instance() ? getModelRoot(model) : transformRepo.get(from.getParent());
             ScalaDesignerModule.logService.info("Create package: " + from + " owner: " + owner);
-            toReturn = model.createPackage(from.getIdentifier(), (NameSpace) owner);
+            toReturn = createPackageRecursive(model, owner, prefix(from.getFullIdentifier(), from.getIdentifier()), from.getIdentifier());
         } else {
             //may be some additional info for packages?
             toReturn = (Package) transformRepo.get(from);
@@ -36,5 +36,17 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
             }
         }
         throw new IllegalArgumentException("UML model doesn't have root package");
+    }
+
+
+    private Package createPackageRecursive(IUmlModel model, ModelElement owner, String namePrefix, String simpleName) {
+        if (!simpleName.contains(".")) {
+            Package modelPackage = model.createPackage(simpleName, (NameSpace) owner);
+            return modelPackage;
+        } else {
+            Package modelPackage = model.createPackage(beforeFirstDot(simpleName), (NameSpace) owner);
+            return createPackageRecursive(model, modelPackage, namePrefix, afterFirstDot(simpleName));
+        }
+        //TODO: save simpleName in repo
     }
 }
