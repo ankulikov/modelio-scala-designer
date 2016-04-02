@@ -120,7 +120,6 @@ public abstract class ProgressBar {
         startTime = Calendar.getInstance ().getTimeInMillis ();
         startLastTask = startTime;
         currentPosition = 0;
-        // TODO Check the test in all reverse (source and binary)
         displayRemainingTime = withRemainingTime;
     }
 

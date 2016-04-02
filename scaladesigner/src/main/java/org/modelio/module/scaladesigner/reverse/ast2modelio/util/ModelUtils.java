@@ -21,4 +21,9 @@ public class ModelUtils {
         }
         return tag;
     }
+
+    public static void deleteElement(ModelElement element) {
+        if (!element.isDeleted())
+            element.delete();
+    }
 }

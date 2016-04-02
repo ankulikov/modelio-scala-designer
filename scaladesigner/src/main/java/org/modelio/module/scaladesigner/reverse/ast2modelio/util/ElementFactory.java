@@ -12,7 +12,7 @@ import org.modelio.metamodel.uml.statik.*;
 import org.modelio.metamodel.uml.statik.Class;
 import org.modelio.metamodel.uml.statik.Package;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.Ast2ModelioRepo;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.vcore.smkernel.mapi.MObject;
 

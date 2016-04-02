@@ -14,7 +14,9 @@ import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.progress.ProgressBar;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.AstVisitor;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ElementCreatorFromAst;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ElementCreatorFromAstHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.IdentifierRepo;
 import org.modelio.module.scaladesigner.reverse.text2ast.ScalacUtils;
 import org.modelio.module.scaladesigner.reverse.text2ast.api.ITextRunner;
 import org.modelio.module.scaladesigner.reverse.text2ast.impl.ScalacTextRunner;
@@ -79,7 +81,7 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
         setTaskName(Messages.getString("Gui.Reverse.GeneratingASTs"));
         List<Map<File, String>> textASTs = getTextASTs(sourcesFilesToReverse);
         Map<File, String> validASTs = textASTs.get(0);
-        Map<File, String> invalidFiles = textASTs.get(1);
+        Map<File, String> invalidFiles = textASTs.get(1); //TODO: process files with errors
        // ProgressBar.updateProgressBar(null);
         updateProgressBarNTimes(sourcesFilesToReverse.size(), null);
         setTaskName(Messages.getString("Gui.Reverse.CreatingAstModels"));
@@ -135,7 +137,8 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
     private void convertToModelio(List<AstElement> models) {
         //====== Transform models to Modelio =============
         ScalaDesignerModule.logService.info("Transform models to Modelio");
-        IAstVisitHandler handler = new ElementCreatorFromAst(Modelio.getInstance().getModelingSession());
+        clearRepos();
+        IAstVisitHandler handler = new ElementCreatorFromAstHandler(Modelio.getInstance().getModelingSession());
         int size = models.size();
         for (int i = 0; i < size; i++) {
            setTaskName(Messages.getString("Gui.Reverse.ProcessingAstModel", i+1, size));
@@ -179,5 +182,10 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
         for (int i = 0; i < n; i++) {
             ProgressBar.updateProgressBar(message);
         }
+    }
+
+    private void clearRepos() {
+        Ast2ModelioRepo.getInstance().clear();
+        IdentifierRepo.getInstance().clear();
     }
 }

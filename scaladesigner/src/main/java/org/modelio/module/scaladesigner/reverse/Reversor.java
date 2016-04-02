@@ -1,11 +1,6 @@
 package org.modelio.module.scaladesigner.reverse;
 
 import com.modelio.module.xmlreverse.IReportWriter;
-import edu.kulikov.ast_parser.AstElementEventHandler;
-import edu.kulikov.ast_parser.AstTreeParser;
-import edu.kulikov.ast_parser.elements.AstElement;
-import edu.kulikov.ast_parser.reader.ReaderConfig;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.widgets.Display;
 import org.modelio.api.model.IModelingSession;
@@ -20,24 +15,16 @@ import org.modelio.metamodel.uml.statik.Package;
 import org.modelio.module.scaladesigner.api.ScalaDesignerParameters;
 import org.modelio.module.scaladesigner.i18n.Messages;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.AstVisitor;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ElementCreatorFromAst;
 import org.modelio.module.scaladesigner.reverse.newwizard.ImageManager;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.IFileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.api.ISourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.filechooser.FileChooserModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.sourcepath.ScalaSourcePathModel;
 import org.modelio.module.scaladesigner.reverse.newwizard.wizard.ScalaReverseWizardView;
-import org.modelio.module.scaladesigner.reverse.text2ast.ScalacUtils;
-import org.modelio.module.scaladesigner.reverse.text2ast.api.ITextRunner;
-import org.modelio.module.scaladesigner.reverse.text2ast.impl.ScalacTextRunner;
-import org.modelio.module.scaladesigner.reverse.util.ScalaFileFinder;
 import org.modelio.module.scaladesigner.reverse.ui.ElementStatus;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.modelio.module.scaladesigner.reverse.ui.ElementStatus.ElementType;
 import static org.modelio.module.scaladesigner.reverse.ui.ElementStatus.ReverseStatus;
@@ -112,7 +99,8 @@ public class Reversor {
                     //========== Process Config ============================
                     if (processRun(config)) {
                         transaction.commit();
-                    }
+                    } else
+                        transaction.rollback();
 
                 }
 
@@ -120,6 +108,7 @@ public class Reversor {
                 // Error during the commit, the rollback is already done
             } catch (Exception e) {
                 ScalaDesignerModule.logService.error(e);
+
             }
         }
 
