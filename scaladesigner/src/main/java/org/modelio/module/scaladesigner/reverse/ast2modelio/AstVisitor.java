@@ -30,6 +30,8 @@ public class AstVisitor {
 
     public void addHandler(IAstVisitHandler handler) {
         handlers.add(handler);
+        if (handler instanceof IContextable)
+            ((IContextable) handler).setContext(context);
     }
 
     public void visit() {
@@ -58,10 +60,7 @@ public class AstVisitor {
     }
 
     private void onStart(AstElement element) {
-        handlers.stream().forEach(h -> {
-            if (h instanceof IContextable) ((IContextable) h).setContext(context);
-            h.onStartVisit(element);
-        });
+        handlers.stream().forEach(h -> h.onStartVisit(element));
     }
 
     private void onEnd(AstElement element) {

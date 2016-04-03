@@ -14,6 +14,7 @@ import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.progress.ProgressBar;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.AstVisitor;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ContextFillerHandler;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ElementCreatorFromAstHandler;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.IdentifierRepo;
@@ -138,17 +139,22 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
         //====== Transform models to Modelio =============
         ScalaDesignerModule.logService.info("Transform models to Modelio");
         clearRepos();
-        IAstVisitHandler handler = new ElementCreatorFromAstHandler(Modelio.getInstance().getModelingSession());
+        ContextFillerHandler contextFillerHandler = new ContextFillerHandler();
+        IAstVisitHandler creatorHandler = new ElementCreatorFromAstHandler(Modelio.getInstance().getModelingSession());
+
         int size = models.size();
         for (int i = 0; i < size; i++) {
            setTaskName(Messages.getString("Gui.Reverse.ProcessingAstModel", i+1, size));
             ScalaDesignerModule.logService.info("Transform model to Modelio");
             AstVisitor visitor = new AstVisitor(models.get(i));
-            visitor.addHandler(handler);
+            visitor.addHandler(contextFillerHandler);
+            visitor.addHandler(creatorHandler);
             visitor.visit();
             ProgressBar.updateProgressBar(null);
         }
     }
+
+
 
     private ArrayList<File> getSourcesFilesToReverse(ReverseConfig config) {
         ArrayList<File> list = new ArrayList<>();
