@@ -7,6 +7,7 @@ import edu.kulikov.ast_parser.reader.ReaderConfig;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.modelio.api.model.IUmlModel;
 import org.modelio.api.modelio.Modelio;
 import org.modelio.api.module.IModule;
 import org.modelio.module.scaladesigner.i18n.Messages;
@@ -14,6 +15,7 @@ import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.progress.ProgressBar;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.AstVisitor;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ContainerScannerHandler;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ContextFillerHandler;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ElementCreatorFromAstHandler;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo;
@@ -73,24 +75,27 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
     }
 
     private void launchSourceReverse() throws Exception {
-        init (true);
+        init(true);
         ArrayList<File> sourcesFilesToReverse = getSourcesFilesToReverse(config);
         //set number of files to track progress
         int taskSize = sourcesFilesToReverse.size() * 3;
         setMaximumValue(taskSize);
-        ScalaDesignerModule.logService.info("Progress maximum value: "+String.valueOf(sourcesFilesToReverse.size() * 3));
+        ScalaDesignerModule.logService.info("Progress maximum value: " + String.valueOf(sourcesFilesToReverse.size() * 4)); //generate + process + transform*2
         monitor.beginTask("Reversing", taskSize);
+        //1) Generate text-AST from files
         setTaskName(Messages.getString("Gui.Reverse.GeneratingASTs"));
         List<Map<File, String>> textASTs = getTextASTs(sourcesFilesToReverse);
         Map<File, String> validASTs = textASTs.get(0);
         Map<File, String> invalidFiles = textASTs.get(1); //TODO: process files with errors
-       // ProgressBar.updateProgressBar(null);
+        // ProgressBar.updateProgressBar(null);
         updateProgressBarNTimes(sourcesFilesToReverse.size(), null);
+        //2) Process text-AST to create model-AST
         setTaskName(Messages.getString("Gui.Reverse.CreatingAstModels"));
         List<AstElement> ASTmodels = getASTmodels(validASTs);
+        //3) Transform model-AST into Modelio
         setTaskName(Messages.getString("Gui.Reverse.ProcessingAstModels"));
         convertToModelio(ASTmodels);
-        monitor.done ();
+        monitor.done();
 //
 //        //debug
 //        monitor.beginTask("Reversing", 10);
@@ -127,7 +132,7 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
         AstElementEventHandler defaultHandler = new AstElementEventHandler();
         models.addAll(validASTs.entrySet().stream().map(fileStringEntry -> {
             setTaskName(Messages.getString("Gui.Reverse.CreatingAstModel", fileStringEntry.getKey().getName()));
-           // config.getReport().addWarning("Test warning AHAHA",null,"Test warning AHAHA description");
+            // config.getReport().addWarning("Test warning AHAHA",null,"Test warning AHAHA description");
             AstElement parse = parser.parse(IOUtils.toInputStream(fileStringEntry.getValue()), defaultHandler);
             ProgressBar.updateProgressBar(null);
             return parse;
@@ -140,21 +145,31 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
         //====== Transform models to Modelio =============
         ScalaDesignerModule.logService.info("Transform models to Modelio");
         clearRepos();
-        ContextFillerHandler contextFillerHandler = new ContextFillerHandler();
-        IAstVisitHandler creatorHandler = new ElementCreatorFromAstHandler(Modelio.getInstance().getModelingSession());
+        //create handlers - may be reused
+        IUmlModel umlModel = Modelio.getInstance().getModelingSession().getModel();
+        IAstVisitHandler contextFillerHandler = new ContextFillerHandler();
+        IAstVisitHandler creatorHandler = new ElementCreatorFromAstHandler(umlModel);
+        ContainerScannerHandler containerScannerHandler = new ContainerScannerHandler(umlModel);
+        //1st step - package and class scanner
+        subtaskConvertToModelio(models, "Gui.Reverse.ScanningContainerElements", contextFillerHandler, containerScannerHandler);
+        //2nd step - element creator
+        subtaskConvertToModelio(models, "Gui.Reverse.CreatingUMLElements", contextFillerHandler, creatorHandler);
+    }
 
+    private void subtaskConvertToModelio(List<AstElement> models, String title, IAstVisitHandler... handlers) {
         int size = models.size();
         for (int i = 0; i < size; i++) {
-           setTaskName(Messages.getString("Gui.Reverse.ProcessingAstModel", i+1, size));
-            ScalaDesignerModule.logService.info("Transform model to Modelio");
+            String taskName = Messages.getString(title, i + 1, size);
+            ScalaDesignerModule.logService.info(taskName);
+            setTaskName(taskName);
             AstVisitor visitor = new AstVisitor(models.get(i));
-            visitor.addHandler(contextFillerHandler);
-            visitor.addHandler(creatorHandler);
+            for (IAstVisitHandler handler : handlers) {
+                visitor.addHandler(handler);
+            }
             visitor.visit();
             ProgressBar.updateProgressBar(null);
         }
     }
-
 
 
     private ArrayList<File> getSourcesFilesToReverse(ReverseConfig config) {

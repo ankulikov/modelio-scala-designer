@@ -12,8 +12,18 @@ import java.util.List;
 import java.util.Set;
 
 public class ReposManager {
+    private static ReposManager instance;
     private Ast2ModelioRepo transformRepo;
     private IdentifierRepo identifierRepo;
+
+    public static ReposManager getInstance() {
+        if (instance == null) {
+            instance = new ReposManager();
+            instance.setTransformRepo(Ast2ModelioRepo.getInstance());
+            instance.setIdentifierRepo(IdentifierRepo.getInstance());
+        }
+        return instance;
+    }
 
     public void setTransformRepo(Ast2ModelioRepo transformRepo) {
         this.transformRepo = transformRepo;
