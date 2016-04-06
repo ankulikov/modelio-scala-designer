@@ -46,6 +46,7 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
     @Override
     public void run(IProgressMonitor localMonitor) throws InvocationTargetException, InterruptedException {
         ScalaDesignerModule.logService.info("Parsing start at " + Calendar.getInstance().getTime().toString());
+        //TODO: rollback transaction in case of exception, javadesigner: Reversor.java#454
         monitor = localMonitor;
         try {
             // Source reverse
