@@ -7,18 +7,25 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IElementFactory;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.IdentifierRepo;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.ReposManager;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ElementFactory extends AbstractElementFactory {
 
-    private static final Ast2ModelioRepo transformRepo = Ast2ModelioRepo.getInstance();
-    private static final IdentifierRepo identifierRepo = IdentifierRepo.getInstance();
+   private static ReposManager reposManager;
     private static Map<Class<? extends AstElement>, IElementFactory> handlers;
 
     static {
+        registerReposManager();
         registerFactories();
+    }
+
+    private static void registerReposManager() {
+        reposManager = new ReposManager();
+        reposManager.setTransformRepo(Ast2ModelioRepo.getInstance());
+        reposManager.setIdentifierRepo(IdentifierRepo.getInstance());
     }
 
     private static void registerFactories() {
@@ -32,8 +39,7 @@ public class ElementFactory extends AbstractElementFactory {
     }
 
     private static IElementFactory initFactory(IElementFactory factory) {
-        factory.setIdentRepo(identifierRepo);
-        factory.setTransformRepo(transformRepo);
+        factory.setReposManager(reposManager);
         return factory;
     }
 

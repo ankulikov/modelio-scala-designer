@@ -10,6 +10,8 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContextable;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.factory.ElementFactory;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.IdentifierRepo;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.ReposManager;
 
 import static org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo.Status.REVERSE_FULL_SIGNATURE;
 
@@ -18,14 +20,16 @@ import static org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2Mod
  */
 public class ElementCreatorFromAstHandler implements IAstVisitHandler, IContextable {
     private final ElementFactory factory;
-    private final Ast2ModelioRepo repo;
+    private final ReposManager rm;
     private final IUmlModel model;
 
     private IContext context;
 
     public ElementCreatorFromAstHandler(IModelingSession session) {
         this.model = session.getModel();
-        this.repo = Ast2ModelioRepo.getInstance();
+        this.rm = new ReposManager();
+        rm.setIdentifierRepo(IdentifierRepo.getInstance());
+        rm.setTransformRepo(Ast2ModelioRepo.getInstance());
         this.factory = new ElementFactory();
     }
 
@@ -37,7 +41,7 @@ public class ElementCreatorFromAstHandler implements IAstVisitHandler, IContexta
             throw new IllegalArgumentException("Context was not initialized!");
         ModelElement element = factory.createElement(astElement, model, context, true);
         if (element != null) {
-            repo.save(astElement, element, REVERSE_FULL_SIGNATURE);
+            rm.attachAstToModelio(astElement, element, REVERSE_FULL_SIGNATURE);
         } else {
             ScalaDesignerModule.logService.warning("Unknown AstElement: " + astElement);
         }

@@ -11,26 +11,23 @@ import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.vcore.smkernel.mapi.MObject;
 
-import static org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo.Status.NOT_REVERSED;
-import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUtils.afterFirstDot;
-import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUtils.beforeFirstDot;
-import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUtils.prefix;
+import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUtils.*;
 
 public class PackageFactory extends AbstractElementFactory<PackageDef, Package> {
 
     @Override
     public Package createElement(PackageDef from, IUmlModel model, IContext context, boolean fill) {
-        Package toReturn = null;
-        if (transformRepo.getStatus(from) == NOT_REVERSED) {
-            ModelElement owner = from.getParent() == NoElement.instance() ? getModelRoot(model) : transformRepo.get(from.getParent());
+        Package aPackage = rm.getByAst(from, Package.class);
+        if (aPackage == null) {
+            ModelElement owner = from.getParent() == NoElement.instance() ? getModelRoot(model) :
+                    rm.getByAst(from.getParent()).get(0);
             ScalaDesignerModule.logService.info("Create package: " + from + " owner: " + owner);
-            toReturn = createPackageRecursive(model, owner, prefix(from.getFullIdentifier(), from.getIdentifier()), from.getIdentifier());
-            saveInIdentRepo(toReturn, from.getFullIdentifier());
-        } else {
-            //may be some additional info for packages?
-            toReturn = (Package) transformRepo.get(from);
+            //if full ident == ident => no upper packages => empty prefix, else
+            //prefix + '.' + ident == fullIdent
+            aPackage = createPackageRecursive(model, owner, from.getFullIdentifier().equals(from.getIdentifier())?"":prefix(from.getFullIdentifier(), '.'+from.getIdentifier()), from.getIdentifier());
+            rm.attachIdentToModelio(aPackage, from.getFullIdentifier());
         }
-        return toReturn;
+        return aPackage;
     }
 
     private Package getModelRoot(IUmlModel model) {
@@ -44,15 +41,19 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
 
 
     private Package createPackageRecursive(IUmlModel model, ModelElement owner, String namePrefix, String simpleName) {
+        ScalaDesignerModule.logService.info("CreatePackageRecursive, namePrefix="+namePrefix+", simpleName="+simpleName);
         if (!simpleName.contains(".")) {
-            Package modelPackage = model.createPackage(simpleName, (NameSpace) owner);
-            return modelPackage;
+            return model.createPackage(simpleName, (NameSpace) owner);
         } else {
-            String nameBeforeFirstDot = beforeFirstDot(simpleName);
-            Package modelPackage = model.createPackage(nameBeforeFirstDot, (NameSpace) owner);
-            //save intermediate packages
-            saveInIdentRepo(modelPackage, namePrefix+'.'+nameBeforeFirstDot);
-            return createPackageRecursive(model, modelPackage, namePrefix, afterFirstDot(simpleName));
+            String simpleBeforeDot = beforeFirstDot(simpleName);
+            String fullIdent = namePrefix + '.' + simpleBeforeDot;
+            Package aPackage = rm.getByFullIdent(fullIdent,Package.class);
+            if (aPackage == null) {
+                aPackage = model.createPackage(simpleBeforeDot, (NameSpace) owner);
+                //save intermediate packages
+                rm.attachIdentToModelio(aPackage, fullIdent);
+            }
+            return createPackageRecursive(model, aPackage, namePrefix, afterFirstDot(simpleName));
         }
     }
 }

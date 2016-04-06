@@ -12,12 +12,17 @@ public class ClassFactory extends AbstractElementFactory<ClassDef, Class> {
 
     @Override
     public Class createElement(ClassDef classDef, IUmlModel model, IContext context, boolean fill) {
-        ModelElement owner = transformRepo.get(classDef.getParent());
-        ScalaDesignerModule.logService.info("Create classDef: " + classDef + " owner: " + owner);
-        Class aClass = model.createClass(classDef.getIdentifier(), (NameSpace) owner);
-        setVisibility(aClass, classDef.getModifiers(), model);
-        putModifierTags(aClass, classDef.getModifiers(), model);
-        saveInIdentRepo(aClass, classDef.getFullIdentifier());
+        Class aClass = rm.getByAst(classDef, Class.class);
+        if (aClass == null) {
+            ModelElement owner = rm.getByAst(classDef.getParent()).get(0);
+            ScalaDesignerModule.logService.info("Create classDef: " + classDef + " owner: " + owner);
+            aClass = model.createClass(classDef.getIdentifier(), (NameSpace) owner);
+            rm.attachIdentToModelio(aClass, classDef.getFullIdentifier());
+        }
+        if (fill) {
+            setVisibility(aClass, classDef.getModifiers(), model);
+            putModifierTags(aClass, classDef.getModifiers(), model);
+        }
         return aClass;
     }
 }

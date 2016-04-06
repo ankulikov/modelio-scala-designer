@@ -11,19 +11,24 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
     @Override
     public Attribute createElement(ValDef valDef, IUmlModel model, IContext context, boolean fill) {
-        //TODO: check that it is field, use context
-        ModelElement owner = transformRepo.get(parent(valDef, ClassDef.class));
-        Attribute attribute = model.createAttribute();
-        attribute.setOwner((Classifier) owner);
-        attribute.setName(valDef.getIdentifier());
 
-        //TODO: set value of field (initializer)?
-        //attribute.setValue();
-        //TODO: set type of field (all classes must be visited before)
-        //attribute.setType();
-        setVisibility(attribute, valDef.getModifiers(), model);
-        putModifierTags(attribute, valDef.getModifiers(), model);
-        saveInIdentRepo(attribute, valDef.getFullIdentifier());
+        Attribute attribute = rm.getByAst(valDef, Attribute.class);
+        if (attribute == null) {
+            //TODO: check that it is field, use context
+            //FIXME: object may be parent too!
+            ModelElement owner = rm.getByAst((parent(valDef, ClassDef.class))).get(0);
+            attribute = model.createAttribute();
+            attribute.setOwner((Classifier) owner);
+            attribute.setName(valDef.getIdentifier());
+
+            //TODO: set value of field (initializer)?
+            //attribute.setValue();
+            //TODO: set type of field (all classes must be visited before)
+            //attribute.setType();
+            setVisibility(attribute, valDef.getModifiers(), model);
+            putModifierTags(attribute, valDef.getModifiers(), model);
+            rm.attachIdentToModelio(attribute, valDef.getFullIdentifier());
+        }
         return attribute;
     }
 }

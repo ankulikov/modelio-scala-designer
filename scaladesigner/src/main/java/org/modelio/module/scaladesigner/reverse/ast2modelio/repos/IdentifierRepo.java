@@ -39,11 +39,11 @@ public class IdentifierRepo implements IRepository {
     }
 
     private Set<ModelElement> getByFullIdentifier(String fullIdentifier) {
-        return Collections.unmodifiableSet(fullIdentifiers.get(fullIdentifier));
+        return fullIdentifiers.containsKey(fullIdentifier)?Collections.unmodifiableSet(fullIdentifiers.get(fullIdentifier)):Collections.emptySet();
     }
 
     private Set<ModelElement> getBySimpleIdentifier(String simpleIdentifier) {
-        return Collections.unmodifiableSet(fullIdentifiers.get(simpleIdentifier));
+        return simpleIdentifiers.containsKey(simpleIdentifier)?Collections.unmodifiableSet(simpleIdentifiers.get(simpleIdentifier)):Collections.emptySet();
     }
 
     //TODO: get by simple name in scope (known imports)

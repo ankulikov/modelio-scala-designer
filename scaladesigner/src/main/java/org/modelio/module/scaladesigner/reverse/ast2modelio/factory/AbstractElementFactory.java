@@ -13,8 +13,7 @@ import org.modelio.metamodel.uml.statik.NameSpace;
 import org.modelio.metamodel.uml.statik.VisibilityMode;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IElementFactory;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.IdentifierRepo;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.ReposManager;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
 
 import java.util.List;
@@ -24,21 +23,17 @@ import static org.modelio.module.scaladesigner.util.Constants.STEREOTYPE_VISIBIL
 
 abstract class AbstractElementFactory<From extends AstElement, To extends ModelElement>
         implements IElementFactory<From, To> {
-    IdentifierRepo identRepo;
-    Ast2ModelioRepo transformRepo;
 
-    @Override
-    public void setIdentRepo(IdentifierRepo identRepo) {
-        this.identRepo = identRepo;
-    }
-
-    @Override
-    public void setTransformRepo(Ast2ModelioRepo transformRepo) {
-        this.transformRepo = transformRepo;
-    }
+    protected ReposManager rm;
 
     static <T extends AstElement> T parent(AstElement element, java.lang.Class<T> type) {
         return (T) AstTraverser.getParentByType(element, type);
+    }
+
+    @Override
+    public void setReposManager(ReposManager reposManager) {
+
+        this.rm = reposManager;
     }
 
     void setVisibility(ModelElement owner, Modifiers modifiers, IUmlModel model) {
@@ -72,7 +67,7 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
         }
     }
 
-     void putModifierTags(ModelElement element, Modifiers modifiers, IUmlModel model) {
+    void putModifierTags(ModelElement element, Modifiers modifiers, IUmlModel model) {
         for (String tag : modifiers.getValues()) {
             try {
                 switch (tag) {
@@ -116,10 +111,7 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
         }
     }
 
-    void saveInIdentRepo(ModelElement element, String fullIdent) {
-        ScalaDesignerModule.logService.info("Save in ident repo: name="+fullIdent+", element="+element);
-        identRepo.save(fullIdent, element);
-    }
+
 
 
 }
