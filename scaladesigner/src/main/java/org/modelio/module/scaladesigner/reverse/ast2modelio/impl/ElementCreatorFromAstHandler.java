@@ -41,7 +41,7 @@ public class ElementCreatorFromAstHandler implements IAstVisitHandler, IContexta
         if (element != null) {
             rm.attachAstToModelio(astElement, element, REVERSE_FULL_SIGNATURE);
         } else {
-            ScalaDesignerModule.logService.warning("Unknown AstElement: " + astElement);
+            ScalaDesignerModule.logService.warning("Unknown AstElement or skip it: " + astElement);
         }
     }
 

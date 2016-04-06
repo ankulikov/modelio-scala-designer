@@ -17,14 +17,18 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
 
     @Override
     public Package createElement(PackageDef from, IUmlModel model, IContext context, boolean fill) {
+        if (from.isForImportsOnly())
+            return null; //don't create package for synthetic package
         Package aPackage = rm.getByAst(from, Package.class);
         if (aPackage == null) {
-            ModelElement owner = from.getParent() == NoElement.instance() ? getModelRoot(model) :
+            ModelElement owner = from.getParent() == NoElement.instance() ||
+                    ((from.getParent() instanceof PackageDef &&
+                            ((PackageDef) from.getParent()).isForImportsOnly())) ? getModelRoot(model) :
                     rm.getByAst(from.getParent()).get(0);
             ScalaDesignerModule.logService.info("Create package: " + from + " owner: " + owner);
             //if full ident == ident => no upper packages => empty prefix, else
             //prefix + '.' + ident == fullIdent
-            aPackage = createPackageRecursive(model, owner, from.getFullIdentifier().equals(from.getIdentifier())?"":prefix(from.getFullIdentifier(), '.'+from.getIdentifier()), from.getIdentifier());
+            aPackage = createPackageRecursive(model, owner, from.getFullIdentifier().equals(from.getIdentifier()) ? "" : prefix(from.getFullIdentifier(), '.' + from.getIdentifier()), from.getIdentifier());
             rm.attachIdentToModelio(aPackage, from.getFullIdentifier());
         }
         return aPackage;
@@ -41,13 +45,13 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
 
 
     private Package createPackageRecursive(IUmlModel model, ModelElement owner, String namePrefix, String simpleName) {
-        ScalaDesignerModule.logService.info("CreatePackageRecursive, namePrefix="+namePrefix+", simpleName="+simpleName);
+        ScalaDesignerModule.logService.info("CreatePackageRecursive, namePrefix=" + namePrefix + ", simpleName=" + simpleName);
         if (!simpleName.contains(".")) {
             return model.createPackage(simpleName, (NameSpace) owner);
         } else {
             String simpleBeforeDot = beforeFirstDot(simpleName);
             String fullIdent = namePrefix + '.' + simpleBeforeDot;
-            Package aPackage = rm.getByFullIdent(fullIdent,Package.class);
+            Package aPackage = rm.getByFullIdent(fullIdent, Package.class);
             if (aPackage == null) {
                 aPackage = model.createPackage(simpleBeforeDot, (NameSpace) owner);
                 //save intermediate packages
