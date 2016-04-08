@@ -40,47 +40,6 @@ public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
         return attribute;
     }
 
-    public GeneralClass resolveType(String typeIdent, IContext context, IUMLTypes types) {
-        DataType umlPrimitive = resolveUMLPrimitive(typeIdent, types);
-        if (umlPrimitive == null) {
-            GeneralClass byAnyIdent = rm.getByAnyIdent(typeIdent, context.getImportScope(), GeneralClass.class);
-            ScalaDesignerModule.logService.info("ResolveType, byIdent="+byAnyIdent);
-            return byAnyIdent;
-        }
-        return types.getUNDEFINED();
-    }
 
 
-    DataType resolveUMLPrimitive(String typeIdent, IUMLTypes types) {
-        if (typeIdent == null)
-            return types.getUNDEFINED();
-        switch (typeIdent) {
-            case "Int":
-            case "scala.Int":
-                return types.getINTEGER();
-            case "Char":
-            case "scala.Char":
-                return types.getCHAR();
-            case "Byte":
-            case "scala.Byte":
-                return types.getBYTE();
-            case "Double":
-            case "scala.Double":
-                return types.getDOUBLE();
-            case "Boolean":
-            case "scala.Boolean":
-                return types.getBOOLEAN();
-            case "Long":
-            case "scala.Long":
-                return types.getLONG();
-            case "Short":
-            case "scala.Short":
-                return types.getSHORT();
-            case "String":
-            case "Predef.String":
-                return types.getSTRING();
-            default:
-                return null;
-        }
-    }
 }

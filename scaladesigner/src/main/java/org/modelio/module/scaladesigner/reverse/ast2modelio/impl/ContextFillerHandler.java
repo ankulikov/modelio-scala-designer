@@ -20,8 +20,10 @@ public class ContextFillerHandler implements IAstVisitHandler, IContextable {
     private Deque<Pair<AstElement, Scope>> currentScopeHolders = new ArrayDeque<>();
     //we need to know scope of import because in Scala imports can be anywhere (*WOOOOO!*)
     private Deque<Pair<AstElement, List<Import>>> importScopeHolders = new ArrayDeque<>();
+    private Deque<PackageDef> currentPackageHolders = new ArrayDeque<>();
 
     @Override
+
     public void onStartVisit(AstElement element) {
         //import scope
         if (element instanceof Import) {
@@ -46,8 +48,12 @@ public class ContextFillerHandler implements IAstVisitHandler, IContextable {
             //Variable can be defined in method or in other variable => skip it
             saveCurrentScope(element, Scope.VARIABLE);
         }
-        ScalaDesignerModule.logService.info("[onStartVisit] Set current scope to context="+currentScope());
-        context.setCurrentScope(currentScope());
+        ScalaDesignerModule.logService.info("[onStartVisit] Set current scope to context=" + currentScope());
+        context.setCurrentScopeType(currentScope());
+        if (element instanceof PackageDef && !((PackageDef) element).isForImportsOnly()) {
+            currentPackageHolders.push((PackageDef) element);
+            context.setCurrentPackage(((PackageDef) element).getFullIdentifier());
+        }
 
     }
 
@@ -61,8 +67,13 @@ public class ContextFillerHandler implements IAstVisitHandler, IContextable {
         }
         if (!currentScopeHolders.isEmpty() && currentScopeHolders.peek().getKey() == element) {
             currentScopeHolders.pop();
-            ScalaDesignerModule.logService.info("[onEndVisit] Set current scope to context="+currentScope());
-            context.setCurrentScope(currentScope());
+            ScalaDesignerModule.logService.info("[onEndVisit] Set current scope to context=" + currentScope());
+            context.setCurrentScopeType(currentScope());
+        }
+        if (element instanceof PackageDef && currentPackageHolders.peek() == element) {
+            currentPackageHolders.pop();
+            context.setCurrentPackage(currentPackageHolders.isEmpty() ? null : currentPackageHolders.peek().getFullIdentifier());
+
         }
     }
 
@@ -84,7 +95,7 @@ public class ContextFillerHandler implements IAstVisitHandler, IContextable {
     }
 
     private void saveCurrentScope(AstElement element, Scope scope) {
-        ScalaDesignerModule.logService.info("Save current scope="+scope+", element="+element);
+        ScalaDesignerModule.logService.info("Save current scope=" + scope + ", element=" + element);
         currentScopeHolders.push(new ImmutablePair<>(element, scope));
     }
 

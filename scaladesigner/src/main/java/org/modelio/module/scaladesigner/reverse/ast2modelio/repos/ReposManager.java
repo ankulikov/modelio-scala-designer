@@ -74,26 +74,34 @@ public class ReposManager {
         return filter.cast(identifierRepo.getByIdentifier(fullIdent).stream().findFirst().filter(filter::isInstance).orElse(null));
     }
 
-    public <T extends ModelElement> T getByAnyIdent(String ident, List<Import> importContext, Class<T> filter) {
+    public <T extends ModelElement> T getByAnyIdent(String ident, String currentPackage, List<Import> importContext, Class<T> filter) {
         String[] split = ident.split("\\.");
-        ScalaDesignerModule.logService.info("getByAnyIdent, ident="+ident);
+        ScalaDesignerModule.logService.info("getByAnyIdent, ident=" + ident);
         if (split.length == 1) {
             //no dots => simple ident
-            return resolveSimpleName(ident, importContext).stream().filter(filter::isInstance).map(filter::cast).findFirst().orElse(null);
-        }  if (split.length > 1) {
+            return resolveSimpleName(ident, currentPackage, importContext).stream().filter(filter::isInstance).map(filter::cast).findFirst().orElse(null);
+        }
+        if (split.length > 1) {
             return identifierRepo.getByFullIdentifier(ident).stream().filter(filter::isInstance).map(filter::cast).findFirst().orElse(null);
             //2+ dots => full ident
             //TODO: package with class (when import package A, ident is A.class_name)
-        } return null;
+        }
+        return null;
     }
 
-    private Set<ModelElement> resolveSimpleName(String ident, List<Import> importContext) {
+    private Set<ModelElement> resolveSimpleName(String ident, String currentPackage, List<Import> importContext) {
         Set<Pair<String, ModelElement>> fullIdentsSet = identifierRepo.getBySimpleIdentifier(ident);
         if (fullIdentsSet.isEmpty())
             ScalaDesignerModule.logService.warning("Cannot find element by simple ident ");
         if (fullIdentsSet.size() == 1)
             //noinspection OptionalGetWithoutIsPresent
             return fullIdentsSet.stream().map(Pair::getRight).collect(Collectors.toSet());
+        //if class in the current package => return from this package, don't scan imports
+        if (currentPackage != null) {
+            Set<ModelElement> set = fullIdentsSet.stream().filter(p -> p.getKey().equals(currentPackage + "." + ident)).map(Pair::getRight).collect(Collectors.toSet());
+            if (!set.isEmpty()) return set;
+        }
+
         //=== find in importContext ===
         //if import is wildcard, we add simple identifier as a suffix and try to find full identifier in
         //set of full identifiers
@@ -105,7 +113,6 @@ public class ReposManager {
                 .filter(p -> flatImports.contains(p.getKey()))
                 .map(Pair::getRight).collect(Collectors.toSet());
     }
-
 
 
 }

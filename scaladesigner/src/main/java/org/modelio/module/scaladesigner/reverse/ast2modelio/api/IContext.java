@@ -7,8 +7,10 @@ import java.util.List;
 
 public interface IContext {
     List<Import> getImportScope();
-    Scope getCurrentScope();
-    void setCurrentScope(Scope scope);
+    Scope getCurrentScopeType();
+    void setCurrentScopeType(Scope scope);
+    void setCurrentPackage(String currentPackage);
+    String getCurrentPackage();
     enum Scope {
         UNKNOWN,
         PACKAGE,

@@ -31,8 +31,8 @@ public class ContainerScannerHandler implements IAstVisitHandler, IContextable {
     public void onStartVisit(AstElement astElement) {
         if (context == null)
             throw new IllegalArgumentException("Context was not initialized!");
-        if (context.getCurrentScope() == Scope.PACKAGE ||
-                context.getCurrentScope() == Scope.CLASS) {
+        if (context.getCurrentScopeType() == Scope.PACKAGE ||
+                context.getCurrentScopeType() == Scope.CLASS) {
             ModelElement element = factory.createElement(astElement, model, context, false);
             if (element != null) {
                 rm.attachAstToModelio(astElement, element, REVERSE_ONLY_NAME);

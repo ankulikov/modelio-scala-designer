@@ -9,6 +9,7 @@ import java.util.List;
 public class Context implements IContext {
     private List<Import> importScope;
     private Scope currentScope = Scope.UNKNOWN;
+    private String currentPackage;
 
     public Context() {
         importScope = new ArrayList<>();
@@ -20,12 +21,22 @@ public class Context implements IContext {
     }
 
     @Override
-    public void setCurrentScope(Scope scope) {
+    public void setCurrentScopeType(Scope scope) {
         this.currentScope = scope;
     }
 
     @Override
-    public Scope getCurrentScope() {
+    public Scope getCurrentScopeType() {
         return currentScope;
+    }
+
+    @Override
+    public void setCurrentPackage(String currentPackage) {
+        this.currentPackage = currentPackage;
+    }
+
+    @Override
+    public String getCurrentPackage() {
+        return currentPackage;
     }
 }

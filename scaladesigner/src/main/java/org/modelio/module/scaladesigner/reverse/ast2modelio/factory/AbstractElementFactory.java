@@ -4,14 +4,14 @@ import edu.kulikov.ast_parser.elements.AstElement;
 import edu.kulikov.ast_parser.elements.Constants;
 import edu.kulikov.ast_parser.elements.Modifiers;
 import edu.kulikov.ast_parser.elements.util.AstTraverser;
+import org.modelio.api.model.IUMLTypes;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.factory.ExtensionNotFoundException;
 import org.modelio.metamodel.uml.infrastructure.Constraint;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
-import org.modelio.metamodel.uml.statik.Feature;
-import org.modelio.metamodel.uml.statik.NameSpace;
-import org.modelio.metamodel.uml.statik.VisibilityMode;
+import org.modelio.metamodel.uml.statik.*;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IElementFactory;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.ReposManager;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
@@ -111,7 +111,46 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
         }
     }
 
+    GeneralClass resolveType(String type, IContext context, IUMLTypes types) {
+        if (type == null) return types.getUNDEFINED();
+        GeneralClass toReturn = resolveUMLPrimitive(type, types);
+        if (toReturn == null) {
+            toReturn = rm.getByAnyIdent(type, context.getCurrentPackage(), context.getImportScope(), GeneralClass.class);
+            ScalaDesignerModule.logService.info("ResolveType, byIdent=" + toReturn);
+        }
+        return (toReturn == null) ? types.getUNDEFINED() : toReturn;
+    }
 
+    private DataType resolveUMLPrimitive(String typeIdent, IUMLTypes types) {
+        switch (typeIdent) {
+            case "Int":
+            case "scala.Int":
+                return types.getINTEGER();
+            case "Char":
+            case "scala.Char":
+                return types.getCHAR();
+            case "Byte":
+            case "scala.Byte":
+                return types.getBYTE();
+            case "Double":
+            case "scala.Double":
+                return types.getDOUBLE();
+            case "Boolean":
+            case "scala.Boolean":
+                return types.getBOOLEAN();
+            case "Long":
+            case "scala.Long":
+                return types.getLONG();
+            case "Short":
+            case "scala.Short":
+                return types.getSHORT();
+            case "String":
+            case "Predef.String":
+                return types.getSTRING();
+            default:
+                return null;
+        }
+    }
 
 
 }
