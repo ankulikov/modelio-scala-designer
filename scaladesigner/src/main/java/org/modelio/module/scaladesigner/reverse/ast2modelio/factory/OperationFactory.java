@@ -11,6 +11,8 @@ import org.modelio.metamodel.uml.statik.Parameter;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 
+import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils.setStereotype;
+
 public class OperationFactory extends AbstractElementFactory<DefDef, Operation> {
     @Override
     public Operation createElement(DefDef defDef, IUmlModel model, IContext context, boolean fill) {
@@ -20,8 +22,13 @@ public class OperationFactory extends AbstractElementFactory<DefDef, Operation> 
             ScalaDesignerModule.logService.info("Create operation: " + defDef + " owner: " + owner);
             operation = model.createOperation(
                     defDef.isConstructor() ? parent(defDef, ClassDef.class).getIdentifier() : defDef.getIdentifier(), (Classifier) owner);
-            //TODO: process generic types
-            model.createReturnParameter("return",resolveType(defDef.getReturnType(),context, model.getUmlTypes()),operation);
+            if (defDef.isConstructor()) {
+                setStereotype(model, operation, "ModelerModule", "create", true);
+            } else {
+                //constructor doesn't have return parameters
+                //TODO: process generic types
+                model.createReturnParameter("return", resolveType(defDef.getReturnType(), context, model.getUmlTypes()), operation);
+            }
             for (ValDef arg : defDef.getArguments().get(0)) {
                 Parameter parameter = model.createParameter();
                 parameter.setName(arg.getIdentifier());
