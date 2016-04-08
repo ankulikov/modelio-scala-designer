@@ -187,6 +187,7 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
                     }
                 } else {
                     List<File> tmpList = ScalaFileFinder.listScalaFilesRec(fileToAdd);
+                    ScalaDesignerModule.logService.info("getSourcesFilesToReverse,  tmpList:" + tmpList.toString());
                     tmpList.stream().filter(tmpFile -> !isInFileList(list, tmpFile)).forEach(list::add);
                 }
             }

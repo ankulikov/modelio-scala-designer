@@ -9,6 +9,7 @@ import org.modelio.metamodel.uml.statik.Attribute;
 import org.modelio.metamodel.uml.statik.Classifier;
 import org.modelio.metamodel.uml.statik.DataType;
 import org.modelio.metamodel.uml.statik.GeneralClass;
+import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 
 public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
@@ -30,7 +31,7 @@ public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
             //TODO: set type of field (all classes must be visited before)
 
 
-            attribute.setType(resolveType(valDef.getType(), model.getUmlTypes()));
+            attribute.setType(resolveType(valDef.getType(), context, model.getUmlTypes()));
             //attribute.setType();
             setVisibility(attribute, valDef.getModifiers(), model);
             putModifierTags(attribute, valDef.getModifiers(), model);
@@ -39,9 +40,16 @@ public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
         return attribute;
     }
 
-    public GeneralClass resolveType(String typeIdent, IUMLTypes types) {
-        return resolveUMLPrimitive(typeIdent, types);
+    public GeneralClass resolveType(String typeIdent, IContext context, IUMLTypes types) {
+        DataType umlPrimitive = resolveUMLPrimitive(typeIdent, types);
+        if (umlPrimitive == null) {
+            GeneralClass byAnyIdent = rm.getByAnyIdent(typeIdent, context.getImportScope(), GeneralClass.class);
+            ScalaDesignerModule.logService.info("ResolveType, byIdent="+byAnyIdent);
+            return byAnyIdent;
+        }
+        return types.getUNDEFINED();
     }
+
 
     DataType resolveUMLPrimitive(String typeIdent, IUMLTypes types) {
         if (typeIdent == null)
@@ -72,7 +80,7 @@ public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
             case "Predef.String":
                 return types.getSTRING();
             default:
-                return types.getUNDEFINED();
+                return null;
         }
     }
 }

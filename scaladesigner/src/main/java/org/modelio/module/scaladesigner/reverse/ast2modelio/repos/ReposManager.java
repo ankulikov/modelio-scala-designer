@@ -2,6 +2,8 @@ package org.modelio.module.scaladesigner.reverse.ast2modelio.repos;
 
 import edu.kulikov.ast_parser.elements.AstElement;
 import edu.kulikov.ast_parser.elements.Identifiable;
+import edu.kulikov.ast_parser.elements.Import;
+import org.apache.commons.lang3.tuple.Pair;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo.Status;
@@ -10,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ReposManager {
     private static ReposManager instance;
@@ -70,5 +73,39 @@ public class ReposManager {
     public <T extends ModelElement> T getByFullIdent(String fullIdent, Class<T> filter) {
         return filter.cast(identifierRepo.getByIdentifier(fullIdent).stream().findFirst().filter(filter::isInstance).orElse(null));
     }
+
+    public <T extends ModelElement> T getByAnyIdent(String ident, List<Import> importContext, Class<T> filter) {
+        String[] split = ident.split("\\.");
+        ScalaDesignerModule.logService.info("getByAnyIdent, ident="+ident);
+        if (split.length == 1) {
+            //no dots => simple ident
+            return resolveSimpleName(ident, importContext).stream().filter(filter::isInstance).map(filter::cast).findFirst().orElse(null);
+        }  if (split.length > 1) {
+            return identifierRepo.getByFullIdentifier(ident).stream().filter(filter::isInstance).map(filter::cast).findFirst().orElse(null);
+            //2+ dots => full ident
+            //TODO: package with class (when import package A, ident is A.class_name)
+        } return null;
+    }
+
+    private Set<ModelElement> resolveSimpleName(String ident, List<Import> importContext) {
+        Set<Pair<String, ModelElement>> fullIdentsSet = identifierRepo.getBySimpleIdentifier(ident);
+        if (fullIdentsSet.isEmpty())
+            ScalaDesignerModule.logService.warning("Cannot find element by simple ident ");
+        if (fullIdentsSet.size() == 1)
+            //noinspection OptionalGetWithoutIsPresent
+            return fullIdentsSet.stream().map(Pair::getRight).collect(Collectors.toSet());
+        //=== find in importContext ===
+        //if import is wildcard, we add simple identifier as a suffix and try to find full identifier in
+        //set of full identifiers
+        Set<String> flatImports = importContext.stream()
+                .flatMap(imprt -> imprt.getSuffixes().stream()
+                        .map(selector -> imprt.getPrefixName() + "." + (selector.isWildcard() ? ident : selector.getSuffix())))
+                .collect(Collectors.toSet());
+        return fullIdentsSet.stream()
+                .filter(p -> flatImports.contains(p.getKey()))
+                .map(Pair::getRight).collect(Collectors.toSet());
+    }
+
+
 
 }

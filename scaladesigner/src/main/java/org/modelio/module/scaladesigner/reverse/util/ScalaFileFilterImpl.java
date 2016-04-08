@@ -16,14 +16,8 @@ class ScalaFileFilterImpl implements FileFilter {
      */
     @Override
     public boolean accept(File pathname) {
-        if (pathname.isDirectory ()) {
-            return true;
-        } else if (pathname.isFile () &&
-                pathname.getAbsolutePath ().endsWith (".java")) {
-            return true;
-        } else {
-            return false;
-        }
+        return pathname.isDirectory() ||
+                pathname.isFile() && pathname.getAbsolutePath().endsWith(".scala");
     }
 
 }

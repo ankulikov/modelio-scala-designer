@@ -50,7 +50,7 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
             return model.createPackage(simpleName, (NameSpace) owner);
         } else {
             String simpleBeforeDot = beforeFirstDot(simpleName);
-            String fullIdent = namePrefix + '.' + simpleBeforeDot;
+            String fullIdent = (namePrefix.isEmpty() ? namePrefix + '.' : "") + simpleBeforeDot;
             Package aPackage = rm.getByFullIdent(fullIdent, Package.class);
             if (aPackage == null) {
                 aPackage = model.createPackage(simpleBeforeDot, (NameSpace) owner);

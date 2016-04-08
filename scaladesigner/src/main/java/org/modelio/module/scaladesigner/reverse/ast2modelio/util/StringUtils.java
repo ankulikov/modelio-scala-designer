@@ -20,4 +20,12 @@ public class StringUtils {
     public static String afterFirstDot(String string) {
         return afterFirst(string, '.');
     }
+
+    public static String afterLast(String string, char symbol) {
+        return string.substring(string.lastIndexOf(symbol)+1);
+    }
+
+    public static String afterLastDot(String string) {
+        return afterLast(string, '.');
+    }
 }
