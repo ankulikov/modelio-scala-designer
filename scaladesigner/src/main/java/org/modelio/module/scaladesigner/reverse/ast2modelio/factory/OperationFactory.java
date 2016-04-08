@@ -2,6 +2,7 @@ package org.modelio.module.scaladesigner.reverse.ast2modelio.factory;
 
 import edu.kulikov.ast_parser.elements.ClassDef;
 import edu.kulikov.ast_parser.elements.DefDef;
+import edu.kulikov.ast_parser.elements.Entity;
 import edu.kulikov.ast_parser.elements.ValDef;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
@@ -18,10 +19,11 @@ public class OperationFactory extends AbstractElementFactory<DefDef, Operation> 
     public Operation createElement(DefDef defDef, IUmlModel model, IContext context, boolean fill) {
         Operation operation = rm.getByAst(defDef, Operation.class);
         if (operation == null) {
-            ModelElement owner = rm.getByAst(parent(defDef, ClassDef.class)).get(0);
+            Entity parent = parent(defDef, Entity.class);
+            ModelElement owner = rm.getByAst(parent).get(0);
             ScalaDesignerModule.logService.info("Create operation: " + defDef + " owner: " + owner);
             operation = model.createOperation(
-                    defDef.isConstructor() ? parent(defDef, ClassDef.class).getIdentifier() : defDef.getIdentifier(), (Classifier) owner);
+                    defDef.isConstructor() ? parent.getIdentifier() : defDef.getIdentifier(), (Classifier) owner);
             if (defDef.isConstructor()) {
                 setStereotype(model, operation, "ModelerModule", "create", true);
             } else {

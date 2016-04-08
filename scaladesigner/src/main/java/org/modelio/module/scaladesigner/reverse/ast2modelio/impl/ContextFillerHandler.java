@@ -31,7 +31,6 @@ public class ContextFillerHandler implements IAstVisitHandler, IContextable {
             saveImport((Import) element);
             context.getImportScope().add((Import) element);
         }
-        //TODO: think about object
         //current scope
         if (currentScope() == Scope.METHOD || currentScope() == Scope.VARIABLE) {
             //don't go into body of method or variable
@@ -41,6 +40,9 @@ public class ContextFillerHandler implements IAstVisitHandler, IContextable {
         } else if (element instanceof ClassDef && currentScope() != Scope.CONTENT_BLOCK) {
             //Class can be defined in methods => skip it
             saveCurrentScope(element, Scope.CLASS);
+        } else if (element instanceof ModuleDef && currentScope() != Scope.CONTENT_BLOCK) {
+            //Object can be defined in methods => skip it
+            saveCurrentScope(element, Scope.OBJECT);
         } else if (element instanceof DefDef && currentScope() != Scope.CONTENT_BLOCK) {
             //Method can be defined in method => skip it
             saveCurrentScope(element, Scope.METHOD);

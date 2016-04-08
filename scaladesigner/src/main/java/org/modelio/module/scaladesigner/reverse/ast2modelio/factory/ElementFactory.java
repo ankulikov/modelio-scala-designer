@@ -7,6 +7,7 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IElementFactory;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.ReposManager;
 
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ public class ElementFactory extends AbstractElementFactory {
             handlers.put(ClassDef.class, initFactory(new ClassFactory()));
             handlers.put(DefDef.class, initFactory(new OperationFactory()));
             handlers.put(ValDef.class, initFactory(new VariableFactory()));
+            handlers.put(ModuleDef.class, initFactory(new ObjectFactory()));
         }
     }
 

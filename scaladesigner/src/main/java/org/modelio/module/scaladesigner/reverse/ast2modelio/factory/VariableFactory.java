@@ -1,6 +1,7 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.factory;
 
 import edu.kulikov.ast_parser.elements.ClassDef;
+import edu.kulikov.ast_parser.elements.Entity;
 import edu.kulikov.ast_parser.elements.ValDef;
 import org.modelio.api.model.IUMLTypes;
 import org.modelio.api.model.IUmlModel;
@@ -19,8 +20,7 @@ public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
         Attribute attribute = rm.getByAst(valDef, Attribute.class);
         if (attribute == null) {
             //TODO: check that it is field, use context
-            //FIXME: object may be parent too!
-            ModelElement owner = rm.getByAst((parent(valDef, ClassDef.class))).get(0);
+            ModelElement owner = rm.getByAst((parent(valDef, Entity.class))).get(0);
             attribute = model.createAttribute();
 
             attribute.setOwner((Classifier) owner);

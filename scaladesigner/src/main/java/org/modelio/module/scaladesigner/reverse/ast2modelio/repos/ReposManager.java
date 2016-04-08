@@ -85,6 +85,7 @@ public class ReposManager {
             return identifierRepo.getByFullIdentifier(ident).stream().filter(filter::isInstance).map(filter::cast).findFirst().orElse(null);
             //2+ dots => full ident
             //TODO: package with class (when import package A, ident is A.class_name)
+            //TODO: inner class
         }
         return null;
     }

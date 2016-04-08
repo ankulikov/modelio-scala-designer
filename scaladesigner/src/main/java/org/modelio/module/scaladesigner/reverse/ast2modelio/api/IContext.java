@@ -15,6 +15,7 @@ public interface IContext {
         UNKNOWN,
         PACKAGE,
         CLASS,
+        OBJECT,
         METHOD,
         VARIABLE,
         CONTENT_BLOCK

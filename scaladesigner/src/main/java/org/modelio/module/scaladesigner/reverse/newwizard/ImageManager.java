@@ -26,21 +26,21 @@ public class ImageManager {
         this.map = new HashMap<>();
         
         // Here, you can define images for buttons...
-        this.map.put("up", new Image(null, modulePath + "/res/bmp/up.png"));
-        this.map.put("down", new Image(null, modulePath + "/res/bmp/down.png"));
-        this.map.put("delete", new Image(null, modulePath + "/res/bmp/delete.png"));
-        this.map.put("java", new Image(null, modulePath + "/res/bmp/javaFile.png"));
-        this.map.put("class", new Image(null, modulePath + "/res/bmp/classFile.png"));
-        this.map.put("jarfile", new Image(null, modulePath + "/res/bmp/jarfile.png"));
-        this.map.put("jar", new Image(null, modulePath + "/res/bmp/jar.png"));
-        this.map.put("directory", new Image(null, modulePath + "/res/bmp/directory.png"));
-        this.map.put("missing", new Image(null, modulePath + "/res/bmp/missing.png"));
+        this.map.put("up", new Image(null, modulePath + "/res/png/up.png"));
+        this.map.put("down", new Image(null, modulePath + "/res/png/down.png"));
+        this.map.put("delete", new Image(null, modulePath + "/res/png/delete.png"));
+        this.map.put("java", new Image(null, modulePath + "/res/png/javaFile.png"));
+        this.map.put("class", new Image(null, modulePath + "/res/png/classFile.png"));
+        this.map.put("jarfile", new Image(null, modulePath + "/res/png/jarfile.png"));
+        this.map.put("jar", new Image(null, modulePath + "/res/png/jar.png"));
+        this.map.put("directory", new Image(null, modulePath + "/res/png/directory.png"));
+        this.map.put("missing", new Image(null, modulePath + "/res/png/missing.png"));
         
-        this.map.put("javaclass", new Image(null, modulePath + "/res/bmp/class.png"));
-        this.map.put("javadatatype", new Image(null, modulePath + "/res/bmp/datatype.png"));
-        this.map.put("javaenumeration", new Image(null, modulePath + "/res/bmp/enumeration.png"));
-        this.map.put("javainterface", new Image(null, modulePath + "/res/bmp/interface.png"));
-        this.map.put("javapackage", new Image(null, modulePath + "/res/bmp/package.png"));
+        this.map.put("javaclass", new Image(null, modulePath + "/res/png/class.png"));
+        this.map.put("javadatatype", new Image(null, modulePath + "/res/png/datatype.png"));
+        this.map.put("javaenumeration", new Image(null, modulePath + "/res/png/enumeration.png"));
+        this.map.put("javainterface", new Image(null, modulePath + "/res/png/interface.png"));
+        this.map.put("javapackage", new Image(null, modulePath + "/res/png/package.png"));
     }
 
     public static ImageManager getInstance() {

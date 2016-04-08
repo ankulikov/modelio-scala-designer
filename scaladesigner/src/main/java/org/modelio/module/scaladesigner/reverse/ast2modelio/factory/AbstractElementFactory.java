@@ -15,18 +15,19 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IElementFactory;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.ReposManager;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
+import org.modelio.module.scaladesigner.util.Constants.Stereotype;
+import org.modelio.module.scaladesigner.util.Constants.Tag;
 
 import java.util.List;
 
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
-import static org.modelio.module.scaladesigner.util.Constants.STEREOTYPE_VISIBILITY;
 
 abstract class AbstractElementFactory<From extends AstElement, To extends ModelElement>
         implements IElementFactory<From, To> {
 
     protected ReposManager rm;
 
-    static <T extends AstElement> T parent(AstElement element, java.lang.Class<T> type) {
+    static <T extends AstElement> T parent(AstElement element,  java.lang.Class<T> type) {
         return (T) AstTraverser.getParentByType(element, type);
     }
 
@@ -49,7 +50,7 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
         if (modifiers.getQualifier() != null) {
             Constraint qualifier = model.createConstraint();
             try {
-                qualifier.addStereotype(MODULE_NAME, STEREOTYPE_VISIBILITY);
+                qualifier.addStereotype(MODULE_NAME, Stereotype.VISIBILITY);
                 qualifier.setBody("Qualifier = " + modifiers.getQualifier().getValue());
                 owner.getConstraintDefinition().add(qualifier);
                 if (modifier == null) {
@@ -73,29 +74,29 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
                 switch (tag) {
                     case Constants.FINAL:
                         ModelUtils.setTaggedValue(model, element, MODULE_NAME,
-                                org.modelio.module.scaladesigner.util.Constants.TAG_FINAL, true);
+                                Tag.FINAL, true);
                         if (element instanceof NameSpace)
                             ((NameSpace) element).setIsLeaf(true);
                         break;
                     case Constants.SEALED:
                         ModelUtils.setTaggedValue(model, element, MODULE_NAME,
-                                org.modelio.module.scaladesigner.util.Constants.TAG_SEALED, true);
+                                Tag.SEALED, true);
                         break;
                     case Constants.IMPLICIT:
                         ModelUtils.setTaggedValue(model, element, MODULE_NAME,
-                                org.modelio.module.scaladesigner.util.Constants.TAG_IMPLICIT, true);
+                                Tag.IMPLICIT, true);
                         break;
                     case Constants.LAZY:
                         ModelUtils.setTaggedValue(model, element, MODULE_NAME,
-                                org.modelio.module.scaladesigner.util.Constants.TAG_LAZY, true);
+                                Tag.LAZY, true);
                         break;
                     case Constants.OVERRIDE:
                         ModelUtils.setTaggedValue(model, element, MODULE_NAME,
-                                org.modelio.module.scaladesigner.util.Constants.TAG_OVERRIDE, true);
+                                Tag.OVERRIDE, true);
                         break;
                     case Constants.MUTABLE:
                         ModelUtils.setTaggedValue(model, element, MODULE_NAME,
-                                org.modelio.module.scaladesigner.util.Constants.TAG_MUTABLE, true);
+                                Tag.MUTABLE, true);
                         break;
                     case Constants.ABSTRACT:
                     case Constants.DEFERRED:

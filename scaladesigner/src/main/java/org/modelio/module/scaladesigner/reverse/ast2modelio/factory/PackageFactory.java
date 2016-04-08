@@ -9,8 +9,12 @@ import org.modelio.metamodel.uml.statik.NameSpace;
 import org.modelio.metamodel.uml.statik.Package;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
+import org.modelio.module.scaladesigner.util.Constants;
+import org.modelio.module.scaladesigner.util.Constants.Stereotype;
 import org.modelio.vcore.smkernel.mapi.MObject;
 
+import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
 import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUtils.*;
 
 public class PackageFactory extends AbstractElementFactory<PackageDef, Package> {
@@ -18,7 +22,7 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
     @Override
     public Package createElement(PackageDef from, IUmlModel model, IContext context, boolean fill) {
         if (from.isForImportsOnly())
-            return null; //don't create package for synthetic package
+            return null; //don't create element for synthetic package
         Package aPackage = rm.getByAst(from, Package.class);
         if (aPackage == null) {
             ModelElement owner = from.getParent() == NoElement.instance() ||
@@ -47,13 +51,16 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
     private Package createPackageRecursive(IUmlModel model, ModelElement owner, String namePrefix, String simpleName) {
         ScalaDesignerModule.logService.info("CreatePackageRecursive, namePrefix=" + namePrefix + ", simpleName=" + simpleName);
         if (!simpleName.contains(".")) {
-            return model.createPackage(simpleName, (NameSpace) owner);
+            Package aPackage = model.createPackage(simpleName, (NameSpace) owner);
+            ModelUtils.setStereotype(model, aPackage, MODULE_NAME, Stereotype.PACKAGE, true);
+            return aPackage;
         } else {
             String simpleBeforeDot = beforeFirstDot(simpleName);
             String fullIdent = (namePrefix.isEmpty() ? namePrefix + '.' : "") + simpleBeforeDot;
             Package aPackage = rm.getByFullIdent(fullIdent, Package.class);
             if (aPackage == null) {
                 aPackage = model.createPackage(simpleBeforeDot, (NameSpace) owner);
+                ModelUtils.setStereotype(model, aPackage, MODULE_NAME, Stereotype.PACKAGE, true);
                 //save intermediate packages
                 rm.attachIdentToModelio(aPackage, fullIdent);
             }
