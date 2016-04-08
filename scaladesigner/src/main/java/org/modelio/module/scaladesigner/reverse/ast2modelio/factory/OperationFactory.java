@@ -20,13 +20,16 @@ public class OperationFactory extends AbstractElementFactory<DefDef, Operation> 
             ScalaDesignerModule.logService.info("Create operation: " + defDef + " owner: " + owner);
             operation = model.createOperation(
                     defDef.isConstructor() ? parent(defDef, ClassDef.class).getIdentifier() : defDef.getIdentifier(), (Classifier) owner);
+            //TODO: process generic types
+            model.createReturnParameter("return",resolveType(defDef.getReturnType(),context, model.getUmlTypes()),operation);
             for (ValDef arg : defDef.getArguments().get(0)) {
                 Parameter parameter = model.createParameter();
                 parameter.setName(arg.getIdentifier());
-                //TODO: get type of parameter (all classes must be visited before)
+                //TODO: process generic types
+                parameter.setType(resolveType(arg.getType(), context, model.getUmlTypes()));
                 parameter.setComposed(operation);
             }
-            //TODO: set return type (all classes must be visited before)
+
             setVisibility(operation, defDef.getModifiers(), model);
             putModifierTags(operation, defDef.getModifiers(), model);
             rm.attachIdentToModelio(operation, defDef.getFullIdentifier());

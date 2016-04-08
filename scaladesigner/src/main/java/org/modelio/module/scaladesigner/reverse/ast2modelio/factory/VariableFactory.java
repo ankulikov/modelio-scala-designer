@@ -27,10 +27,7 @@ public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
             attribute.setName(valDef.getIdentifier());
 
             //TODO: set value of field (initializer)?
-            //attribute.setValue();
-            //TODO: set type of field (all classes must be visited before)
-
-
+            //TODO: process generic types
             attribute.setType(resolveType(valDef.getType(), context, model.getUmlTypes()));
             //attribute.setType();
             setVisibility(attribute, valDef.getModifiers(), model);
