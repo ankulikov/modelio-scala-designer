@@ -11,7 +11,7 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContextable;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.factory.ElementFactory;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.ReposManager;
 
-import static org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo.Status.REVERSE_ONLY_NAME;
+import static org.modelio.module.scaladesigner.reverse.ast2modelio.api.IElementFactory.Stage.REVERSE_SELF_MINIMUM;
 
 public class ContainerScannerHandler implements IAstVisitHandler, IContextable {
 
@@ -32,10 +32,11 @@ public class ContainerScannerHandler implements IAstVisitHandler, IContextable {
         if (context == null)
             throw new IllegalArgumentException("Context was not initialized!");
         if (context.getCurrentScopeType() == Scope.PACKAGE ||
-                context.getCurrentScopeType() == Scope.CLASS) {
-            ModelElement element = factory.createElement(astElement, model, context, false);
+                context.getCurrentScopeType() == Scope.CLASS ||
+                context.getCurrentScopeType() == Scope.OBJECT) {
+            ModelElement element = factory.createElement(astElement, model, context, REVERSE_SELF_MINIMUM);
             if (element != null) {
-                rm.attachAstToModelio(astElement, element, REVERSE_ONLY_NAME);
+                rm.attachAstToModelio(astElement, element);
             } else {
                 ScalaDesignerModule.logService.warning("Unknown AstElement: " + astElement);
             }

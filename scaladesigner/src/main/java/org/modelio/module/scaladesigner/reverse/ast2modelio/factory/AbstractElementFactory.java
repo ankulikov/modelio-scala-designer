@@ -27,8 +27,8 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
 
     protected ReposManager rm;
 
-    static <T extends AstElement> T parent(AstElement element,  java.lang.Class<T> type) {
-        return (T) AstTraverser.getParentByType(element, type);
+    static <T extends AstElement> AstElement parent(AstElement element,  java.lang.Class<T> ...filter) {
+        return  AstTraverser.getParentByType(element, filter);
     }
 
     @Override

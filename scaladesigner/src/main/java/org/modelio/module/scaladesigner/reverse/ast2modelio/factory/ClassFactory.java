@@ -15,19 +15,20 @@ import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODU
 public class ClassFactory extends AbstractElementFactory<ClassDef, GeneralClass> {
 
     @Override
-    public GeneralClass createElement(ClassDef classDef, IUmlModel model, IContext context, boolean fill) {
+    public GeneralClass createElement(ClassDef classDef, IUmlModel model, IContext context, Stage stage) {
         GeneralClass aClass = rm.getByAst(classDef, GeneralClass.class);
-        if (aClass == null) {
-            ModelElement owner = rm.getByAst(classDef.getParent()).get(0);
-            ScalaDesignerModule.logService.info("Create classDef: " + classDef + " owner: " + owner);
-            if (classDef.isCase()) {
-                aClass = model.createDataType(classDef.getIdentifier(), (NameSpace) owner);
-            } else {
-                aClass = model.createClass(classDef.getIdentifier(), (NameSpace) owner);
+        if (stage == Stage.REVERSE_SELF_MINIMUM) {
+            if (aClass == null) {
+                ModelElement owner = rm.getParentFromRepo(classDef);
+                ScalaDesignerModule.logService.info("Create classDef: " + classDef + " owner: " + owner);
+                if (classDef.isCase()) {
+                    aClass = model.createDataType(classDef.getIdentifier(), (NameSpace) owner);
+                } else {
+                    aClass = model.createClass(classDef.getIdentifier(), (NameSpace) owner);
+                }
+                rm.attachIdentToModelio(aClass, classDef.getFullIdentifier());
             }
-            rm.attachIdentToModelio(aClass, classDef.getFullIdentifier());
-        }
-        if (fill) {
+        } else if (stage == Stage.REVERSE_SELF_FULL) {
             setVisibility(aClass, classDef.getModifiers(), model);
             putModifierTags(aClass, classDef.getModifiers(), model);
             if (classDef.isTrait()) {
@@ -38,6 +39,8 @@ public class ClassFactory extends AbstractElementFactory<ClassDef, GeneralClass>
                     ModelUtils.setStereotype(model, aClass, MODULE_NAME, Stereotype.CASE, true);
                 }
             }
+        } else if (stage == Stage.REVERSE_RELATIONS) {
+            //TODO: analyze hierarchy
         }
         return aClass;
     }

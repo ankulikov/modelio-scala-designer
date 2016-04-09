@@ -3,10 +3,10 @@ package org.modelio.module.scaladesigner.reverse.ast2modelio.repos;
 import edu.kulikov.ast_parser.elements.AstElement;
 import edu.kulikov.ast_parser.elements.Identifiable;
 import edu.kulikov.ast_parser.elements.Import;
+import edu.kulikov.ast_parser.elements.util.NoElement;
 import org.apache.commons.lang3.tuple.Pair;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo.Status;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,8 +41,16 @@ public class ReposManager {
         identifierRepo.save(fullIdentifier, element);
     }
 
-    public void attachAstToModelio(AstElement ast, ModelElement modelio, Status status) {
-        transformRepo.save(ast, modelio, status);
+    public void attachAstToModelio(AstElement ast, ModelElement modelio) {
+        transformRepo.save(ast, modelio);
+    }
+
+    public ModelElement getParentFromRepo(AstElement element) {
+        if (element == NoElement.instance()) return null;
+        AstElement parent = element.getParent();
+        List<ModelElement> byAst = getByAst(parent);
+        if (byAst == null || byAst.isEmpty()) return getParentFromRepo(parent);
+        return byAst.get(0);
     }
 
     public List<ModelElement> getByAst(AstElement element) {

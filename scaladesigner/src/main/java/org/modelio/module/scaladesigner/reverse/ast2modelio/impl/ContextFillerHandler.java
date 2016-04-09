@@ -87,12 +87,12 @@ public class ContextFillerHandler implements IAstVisitHandler, IContextable {
     private void saveImport(Import iimport) {
         AstElement parent = iimport.getParent();
         if (!importScopeHolders.isEmpty() &&
-                importScopeHolders.peek().getKey() == iimport.getParent())
+                importScopeHolders.peek().getKey() == parent)
             importScopeHolders.peek().getRight().add(iimport);
         else {
             ArrayList<Import> imports = new ArrayList<>();
             imports.add(iimport);
-            importScopeHolders.push(new ImmutablePair<>(iimport.getParent(), imports));
+            importScopeHolders.push(new ImmutablePair<>(parent, imports));
         }
     }
 

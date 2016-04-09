@@ -10,7 +10,6 @@ import org.modelio.metamodel.uml.statik.Package;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
-import org.modelio.module.scaladesigner.util.Constants;
 import org.modelio.module.scaladesigner.util.Constants.Stereotype;
 import org.modelio.vcore.smkernel.mapi.MObject;
 
@@ -20,20 +19,23 @@ import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUt
 public class PackageFactory extends AbstractElementFactory<PackageDef, Package> {
 
     @Override
-    public Package createElement(PackageDef from, IUmlModel model, IContext context, boolean fill) {
+    public Package createElement(PackageDef from, IUmlModel model, IContext context, Stage stage) {
         if (from.isForImportsOnly())
             return null; //don't create element for synthetic package
         Package aPackage = rm.getByAst(from, Package.class);
-        if (aPackage == null) {
-            ModelElement owner = from.getParent() == NoElement.instance() ||
-                    ((from.getParent() instanceof PackageDef &&
-                            ((PackageDef) from.getParent()).isForImportsOnly())) ? getModelRoot(model) :
-                    rm.getByAst(from.getParent()).get(0);
-            ScalaDesignerModule.logService.info("Create package: " + from + " owner: " + owner);
-            //if full ident == ident => no upper packages => empty prefix, else
-            //prefix + '.' + ident == fullIdent
-            aPackage = createPackageRecursive(model, owner, from.getFullIdentifier().equals(from.getIdentifier()) ? "" : prefix(from.getFullIdentifier(), '.' + from.getIdentifier()), from.getIdentifier());
-            rm.attachIdentToModelio(aPackage, from.getFullIdentifier());
+        if (stage == Stage.REVERSE_SELF_MINIMUM || stage == Stage.REVERSE_SELF_FULL) {
+
+            if (aPackage == null) {
+                ModelElement owner = from.getParent() == NoElement.instance() ||
+                        ((from.getParent() instanceof PackageDef &&
+                                ((PackageDef) from.getParent()).isForImportsOnly())) ? getModelRoot(model) :
+                        rm.getByAst(from.getParent()).get(0);
+                ScalaDesignerModule.logService.info("Create package: " + from + " owner: " + owner);
+                //if full ident == ident => no upper packages => empty prefix, else
+                //prefix + '.' + ident == fullIdent
+                aPackage = createPackageRecursive(model, owner, from.getFullIdentifier().equals(from.getIdentifier()) ? "" : prefix(from.getFullIdentifier(), '.' + from.getIdentifier()), from.getIdentifier());
+                rm.attachIdentToModelio(aPackage, from.getFullIdentifier());
+            }
         }
         return aPackage;
     }

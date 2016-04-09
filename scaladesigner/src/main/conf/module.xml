@@ -87,7 +87,7 @@
                 <Handler class="ElementCreate">
                     <HParameter name="name" value="%CreateElementCommandExampleName"/>
                     <HParameter name="metaclass" value="Class"/>
-                    <HParameter name="stereotype" value="stereotype1"/>
+                    <HParameter name="stereotype" value=""/>
                 </Handler>
             </Command>
             <Command id="CreateDiagramCommandExample" label="%CreateDiagramCommandExampleLabel" tooltip="%CreateDiagramCommandExampleTooltip" image="res/icons/Stereotype2_16.png" group="" modify-model="true" group-image="">
@@ -95,7 +95,7 @@
                 <Handler class="DiagramCreate">
                     <HParameter name="name" value="%CreateDiagramCommandExampleName"/>
                     <HParameter name="metaclass" value="ClassDiagram"/>
-                    <HParameter name="stereotype" value="stereotype2"/>
+                    <HParameter name="stereotype" value=""/>
                 </Handler>
             </Command>
             <Command id="ReverseSources" label="%ReverseSources.label" tooltip="%ReverseSources.tooltip" image="res/png/revsources.png" group="%ReverseSources.group" modify-model="true" group-image="%ReverseSources.groupimage">
@@ -109,7 +109,7 @@
                 <Handler class="Box">
                     <HParameter name="name" value="%CreateElementDiagramCommandExampleName"/>
                     <HParameter name="metaclass" value="Class"/>
-                    <HParameter name="stereotype" value="stereotype1"/>
+                    <HParameter name="stereotype" value=""/>
                 </Handler>
             </Tool>
         </Tools>
@@ -120,7 +120,7 @@
             <CommandRef refid="ReverseSources"/>
         </ContextualMenu>
         <Diagrams>
-            <DiagramType base-diagram="ClassDiagram" stereotype="stereotype2">
+            <DiagramType base-diagram="ClassDiagram" stereotype="">
                 <Palette keepBasePalette="false">
                     <ToolRef refid="CreateElementDiagramCommandExample" group="Customization"/>
                 </Palette>

@@ -15,23 +15,27 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 
 public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
     @Override
-    public Attribute createElement(ValDef valDef, IUmlModel model, IContext context, boolean fill) {
+    public Attribute createElement(ValDef valDef, IUmlModel model, IContext context, Stage stage) {
 
         Attribute attribute = rm.getByAst(valDef, Attribute.class);
-        if (attribute == null) {
-            //TODO: check that it is field, use context
-            ModelElement owner = rm.getByAst((parent(valDef, Entity.class))).get(0);
-            attribute = model.createAttribute();
+        if (stage == Stage.REVERSE_SELF_MINIMUM || stage == Stage.REVERSE_SELF_FULL) {
+            if (attribute == null) {
+                //TODO: check that it is field, use context
+                ModelElement owner = rm.getParentFromRepo(valDef);
+                attribute = model.createAttribute();
 
-            attribute.setOwner((Classifier) owner);
-            attribute.setName(valDef.getIdentifier());
+                attribute.setOwner((Classifier) owner);
+                attribute.setName(valDef.getIdentifier());
 
-            //TODO: set value of field (initializer)?
-            //TODO: process generic types
-            attribute.setType(resolveType(valDef.getType(), context, model.getUmlTypes()));
-            setVisibility(attribute, valDef.getModifiers(), model);
-            putModifierTags(attribute, valDef.getModifiers(), model);
-            rm.attachIdentToModelio(attribute, valDef.getFullIdentifier());
+                //TODO: set value of field (initializer)?
+                //TODO: process generic types
+                attribute.setType(resolveType(valDef.getType(), context, model.getUmlTypes()));
+                setVisibility(attribute, valDef.getModifiers(), model);
+                putModifierTags(attribute, valDef.getModifiers(), model);
+                rm.attachIdentToModelio(attribute, valDef.getFullIdentifier());
+            }
+        } else if (stage == Stage.REVERSE_RELATIONS) {
+            //TODO: analyze content block
         }
         return attribute;
     }

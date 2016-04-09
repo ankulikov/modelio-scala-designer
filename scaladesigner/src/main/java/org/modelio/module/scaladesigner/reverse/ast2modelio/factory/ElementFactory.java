@@ -42,11 +42,11 @@ public class ElementFactory extends AbstractElementFactory {
     }
 
     @Override
-    public ModelElement createElement(AstElement from, IUmlModel model, IContext context, boolean fill) {
+    public ModelElement createElement(AstElement from, IUmlModel model, IContext context, Stage stage) {
         IElementFactory factory = handlers.get(from.getClass());
         if (factory == null) return null;
         //noinspection unchecked
-        return factory.createElement(from, model, context, fill);
+        return factory.createElement(from, model, context, stage);
     }
 
 
