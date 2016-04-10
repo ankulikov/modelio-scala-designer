@@ -6,6 +6,7 @@ import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.metamodel.uml.statik.GeneralClass;
 import org.modelio.metamodel.uml.statik.NameSpace;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers.ParentAnalyzer;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
 import org.modelio.module.scaladesigner.util.Constants.Stereotype;
@@ -34,7 +35,12 @@ public class ObjectFactory extends AbstractElementFactory<ModuleDef, GeneralClas
             setVisibility(object, moduleDef.getModifiers(), model);
             putModifierTags(object, moduleDef.getModifiers(), model);
         } else if (stage == Stage.REVERSE_RELATIONS) {
-            //TODO
+            ScalaDesignerModule.logService.info("REVERSE_RELATIONS for Object, baseTypes=" + moduleDef.getBase());
+            ParentAnalyzer.analyzeParents(
+                    moduleDef,
+                    resolveTypes(moduleDef.getBase(), context, model.getUmlTypes()),
+                    model, rm);
+            //TODO: analyze hierarchy
         }
         return object;
 

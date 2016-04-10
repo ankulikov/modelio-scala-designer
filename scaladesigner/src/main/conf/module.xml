@@ -48,6 +48,21 @@
                 <Image path=""/>
                 <TagTypes/>
             </Stereotype>
+            <Stereotype name="ScalaExtends" metaclass="Generalization" is-hidden="false" label="extends" uid="4b75f5f5-20d8-4c78-8318-2e6deeae54d9">
+                <Icon path=""/>
+                <Image path=""/>
+                <TagTypes/>
+            </Stereotype>
+            <Stereotype name="ScalaMixin" metaclass="Dependency" is-hidden="false" label="mixin" uid="6bd8eb58-dc63-41c8-aa72-e929afc7306d">
+                <Icon path=""/>
+                <Image path=""/>
+                <TagTypes/>
+            </Stereotype>
+            <Stereotype name="ScalaMixin" metaclass="Generalization" is-hidden="false" label="mixin" uid="3b8e4183-f018-4896-a53b-ac13565961cd">
+                <Icon path=""/>
+                <Image path=""/>
+                <TagTypes/>
+            </Stereotype>
             <MetaclassReference uid="05039ad7-8443-420f-958e-02a76d1ffd95" metaclass="Attribute">
                 <TagTypes>
                     <TagType name="ScalaLazy" uid="5a2b1d75-cc12-4e8f-a059-1376821960f2" label="Lazy" parameter-card="0" is-hidden="false" is-signed="false"/>
@@ -121,14 +136,6 @@
             <CommandRef refid="CreateDiagramCommandExample"/>
             <CommandRef refid="ReverseSources"/>
         </ContextualMenu>
-        <!--<Diagrams>-->
-            <!--<DiagramType base-diagram="ClassDiagram">-->
-                <!--<Palette keepBasePalette="false">-->
-                    <!--<ToolRef refid="CreateElementDiagramCommandExample" group="Customization"/>-->
-                <!--</Palette>-->
-                <!--<Handler class="StandardCustomizer"/>-->
-            <!--</DiagramType>-->
-        <!--</Diagrams>-->
         <Views/>
     </Gui>
     <Dependencies/>

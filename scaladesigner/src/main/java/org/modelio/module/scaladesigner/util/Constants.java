@@ -9,6 +9,7 @@ public interface Constants {
         String CASE = "ScalaCaseClass";
         String PACKAGE = "ScalaPackage";
         String EXTENDS = "ScalaExtends";
+        String MIXIN = "ScalaMixin";
     }
     interface Tag {
         String LAZY = "ScalaLazy";
