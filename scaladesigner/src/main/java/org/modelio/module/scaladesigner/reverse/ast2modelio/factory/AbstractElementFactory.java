@@ -19,6 +19,7 @@ import org.modelio.module.scaladesigner.util.Constants.Stereotype;
 import org.modelio.module.scaladesigner.util.Constants.Tag;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
 
@@ -120,6 +121,10 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
             ScalaDesignerModule.logService.info("ResolveType, byIdent=" + toReturn);
         }
         return (toReturn == null) ? types.getUNDEFINED() : toReturn;
+    }
+
+    List<GeneralClass> resolveTypes(List<String> types, IContext context, IUMLTypes umlTypes) {
+        return types.stream().map(t->resolveType(t, context, umlTypes)).collect(Collectors.toList());
     }
 
     private DataType resolveUMLPrimitive(String typeIdent, IUMLTypes types) {

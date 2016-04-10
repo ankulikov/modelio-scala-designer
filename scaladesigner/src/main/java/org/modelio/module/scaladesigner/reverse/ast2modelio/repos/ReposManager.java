@@ -3,7 +3,7 @@ package org.modelio.module.scaladesigner.reverse.ast2modelio.repos;
 import edu.kulikov.ast_parser.elements.AstElement;
 import edu.kulikov.ast_parser.elements.Identifiable;
 import edu.kulikov.ast_parser.elements.Import;
-import edu.kulikov.ast_parser.elements.util.NoElement;
+import edu.kulikov.ast_parser.elements.NoElement;
 import org.apache.commons.lang3.tuple.Pair;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
@@ -51,6 +51,13 @@ public class ReposManager {
         List<ModelElement> byAst = getByAst(parent);
         if (byAst == null || byAst.isEmpty()) return getParentFromRepo(parent);
         return byAst.get(0);
+    }
+
+    public AstElement getParentAstFromRepo(AstElement element) {
+        if (element == NoElement.instance()) return null;
+        AstElement parent = element.getParent();
+        if (transformRepo.get(parent)==null) return getParentAstFromRepo(parent);
+        else return parent;
     }
 
     public List<ModelElement> getByAst(AstElement element) {

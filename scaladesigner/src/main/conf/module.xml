@@ -8,7 +8,7 @@
         <PathEntry path="lib/commons-lang3-3.1.jar"/>
         <PathEntry path="lib/commons-io-2.4.jar"/>
         <PathEntry path="lib/guava-19.0.jar"/>
-        <PathEntry path="lib/scala-ast-parser-0.9.jar"/>
+        <PathEntry path="lib/scala-ast-parser-0.9.1.jar"/>
         <PathEntry path="lib/slf4j-api-1.7.13.jar"/>
     </ClassPath>
     <Profiles>
@@ -39,6 +39,11 @@
                 <TagTypes/>
             </Stereotype>
             <Stereotype name="ScalaVisibility" metaclass="Constraint" is-hidden="false" label="Visibility" uid="76316380-2a8f-40b0-91bb-dbca6306eb9f">
+                <Icon path=""/>
+                <Image path=""/>
+                <TagTypes/>
+            </Stereotype>
+            <Stereotype name="ScalaExtends" metaclass="Dependency" is-hidden="false" label="extends" uid="95a9b32a-a8ea-42a4-8b9f-2a494f86f05e">
                 <Icon path=""/>
                 <Image path=""/>
                 <TagTypes/>
@@ -87,7 +92,6 @@
                 <Handler class="ElementCreate">
                     <HParameter name="name" value="%CreateElementCommandExampleName"/>
                     <HParameter name="metaclass" value="Class"/>
-                    <HParameter name="stereotype" value=""/>
                 </Handler>
             </Command>
             <Command id="CreateDiagramCommandExample" label="%CreateDiagramCommandExampleLabel" tooltip="%CreateDiagramCommandExampleTooltip" image="res/icons/Stereotype2_16.png" group="" modify-model="true" group-image="">
@@ -95,7 +99,6 @@
                 <Handler class="DiagramCreate">
                     <HParameter name="name" value="%CreateDiagramCommandExampleName"/>
                     <HParameter name="metaclass" value="ClassDiagram"/>
-                    <HParameter name="stereotype" value=""/>
                 </Handler>
             </Command>
             <Command id="ReverseSources" label="%ReverseSources.label" tooltip="%ReverseSources.tooltip" image="res/png/revsources.png" group="%ReverseSources.group" modify-model="true" group-image="%ReverseSources.groupimage">
@@ -109,7 +112,6 @@
                 <Handler class="Box">
                     <HParameter name="name" value="%CreateElementDiagramCommandExampleName"/>
                     <HParameter name="metaclass" value="Class"/>
-                    <HParameter name="stereotype" value=""/>
                 </Handler>
             </Tool>
         </Tools>
@@ -119,14 +121,14 @@
             <CommandRef refid="CreateDiagramCommandExample"/>
             <CommandRef refid="ReverseSources"/>
         </ContextualMenu>
-        <Diagrams>
-            <DiagramType base-diagram="ClassDiagram" stereotype="">
-                <Palette keepBasePalette="false">
-                    <ToolRef refid="CreateElementDiagramCommandExample" group="Customization"/>
-                </Palette>
-                <Handler class="StandardCustomizer"/>
-            </DiagramType>
-        </Diagrams>
+        <!--<Diagrams>-->
+            <!--<DiagramType base-diagram="ClassDiagram">-->
+                <!--<Palette keepBasePalette="false">-->
+                    <!--<ToolRef refid="CreateElementDiagramCommandExample" group="Customization"/>-->
+                <!--</Palette>-->
+                <!--<Handler class="StandardCustomizer"/>-->
+            <!--</DiagramType>-->
+        <!--</Diagrams>-->
         <Views/>
     </Gui>
     <Dependencies/>

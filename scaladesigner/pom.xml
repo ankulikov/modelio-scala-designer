@@ -68,7 +68,7 @@
 		<dependency>
 			<groupId>edu.kulikov</groupId>
 			<artifactId>scala-ast-parser</artifactId>
-			<version>0.9</version>
+			<version>0.9.1</version>
 		</dependency>
 
 		<dependency>

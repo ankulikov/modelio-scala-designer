@@ -1,7 +1,7 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.factory;
 
+import edu.kulikov.ast_parser.elements.NoElement;
 import edu.kulikov.ast_parser.elements.PackageDef;
-import edu.kulikov.ast_parser.elements.util.NoElement;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.mda.Project;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;

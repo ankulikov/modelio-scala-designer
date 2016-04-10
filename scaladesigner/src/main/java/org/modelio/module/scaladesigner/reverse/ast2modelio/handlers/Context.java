@@ -1,4 +1,4 @@
-package org.modelio.module.scaladesigner.reverse.ast2modelio.impl;
+package org.modelio.module.scaladesigner.reverse.ast2modelio.handlers;
 
 import edu.kulikov.ast_parser.elements.Import;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;

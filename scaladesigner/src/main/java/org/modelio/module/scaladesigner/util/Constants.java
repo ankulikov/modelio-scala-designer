@@ -8,6 +8,7 @@ public interface Constants {
         String TRAIT = "ScalaTrait";
         String CASE = "ScalaCaseClass";
         String PACKAGE = "ScalaPackage";
+        String EXTENDS = "ScalaExtends";
     }
     interface Tag {
         String LAZY = "ScalaLazy";

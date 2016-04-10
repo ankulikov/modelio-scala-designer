@@ -1,4 +1,4 @@
-package org.modelio.module.scaladesigner.reverse.ast2modelio.impl;
+package org.modelio.module.scaladesigner.reverse.ast2modelio.handlers;
 
 import edu.kulikov.ast_parser.elements.AstElement;
 import org.modelio.api.model.IUmlModel;

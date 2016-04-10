@@ -1,13 +1,13 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio;
 
 import edu.kulikov.ast_parser.elements.AstElement;
-import edu.kulikov.ast_parser.elements.util.NoElement;
+import edu.kulikov.ast_parser.elements.NoElement;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContextable;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.Context;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.handlers.Context;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

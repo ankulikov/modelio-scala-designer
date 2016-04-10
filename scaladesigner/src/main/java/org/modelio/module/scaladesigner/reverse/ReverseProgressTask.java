@@ -15,9 +15,10 @@ import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.progress.ProgressBar;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.AstVisitor;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IAstVisitHandler;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ContainerScannerHandler;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ContextFillerHandler;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.impl.ElementCreatorFromAstHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.handlers.ContainerScannerHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.handlers.ContextFillerHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.handlers.ElementCreatorFromAstHandler;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.handlers.RelationsCreatorHandler;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.Ast2ModelioRepo;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.IdentifierRepo;
 import org.modelio.module.scaladesigner.reverse.text2ast.ScalacUtils;
@@ -148,12 +149,13 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
         //create handlers - may be reused
         IUmlModel umlModel = Modelio.getInstance().getModelingSession().getModel();
         IAstVisitHandler contextFillerHandler = new ContextFillerHandler();
-        IAstVisitHandler creatorHandler = new ElementCreatorFromAstHandler(umlModel);
         ContainerScannerHandler containerScannerHandler = new ContainerScannerHandler(umlModel);
+        IAstVisitHandler elementCreatorHandler = new ElementCreatorFromAstHandler(umlModel);
+        RelationsCreatorHandler relationsCreatorHandler = new RelationsCreatorHandler(umlModel);
         //1st step - package and class scanner
         subtaskConvertToModelio(models, "Gui.Reverse.ScanningContainerElements", contextFillerHandler, containerScannerHandler);
-        //2nd step - element creator
-        subtaskConvertToModelio(models, "Gui.Reverse.CreatingUMLElements", contextFillerHandler, creatorHandler);
+        //2nd step - element creator and relations
+        subtaskConvertToModelio(models, "Gui.Reverse.CreatingUMLElements", contextFillerHandler, elementCreatorHandler, relationsCreatorHandler);
     }
 
     private void subtaskConvertToModelio(List<AstElement> models, String title, IAstVisitHandler... handlers) {
