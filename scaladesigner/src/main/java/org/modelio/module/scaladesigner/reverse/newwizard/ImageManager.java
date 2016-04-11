@@ -35,6 +35,8 @@ public class ImageManager {
         this.map.put("jar", new Image(null, modulePath + "/res/png/jar.png"));
         this.map.put("directory", new Image(null, modulePath + "/res/png/directory.png"));
         this.map.put("missing", new Image(null, modulePath + "/res/png/missing.png"));
+
+        this.map.put("scala", new Image(null, modulePath + "/res/png/ScalaClass.png"));
         
         this.map.put("javaclass", new Image(null, modulePath + "/res/png/class.png"));
         this.map.put("javadatatype", new Image(null, modulePath + "/res/png/datatype.png"));

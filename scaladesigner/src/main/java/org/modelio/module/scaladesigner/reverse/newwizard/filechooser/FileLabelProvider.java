@@ -16,7 +16,7 @@ class FileLabelProvider implements ILabelProvider {
             String name = f.getName();
         
             if (name.endsWith (".scala")) { //$NON-NLS-1$
-                return ImageManager.getInstance().getIcon("scala"); //TODO: add icon for scala classes
+                return ImageManager.getInstance().getIcon("scala");
             } else if (f.isDirectory()) {
                 return ImageManager.getInstance().getIcon("directory");
             }
