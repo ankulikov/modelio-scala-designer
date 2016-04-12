@@ -1,10 +1,12 @@
 package org.modelio.module.scaladesigner.reverse;
 
+import com.modelio.module.xmlreverse.IReportWriter;
 import edu.kulikov.ast_parser.AstElementEventHandler;
 import edu.kulikov.ast_parser.AstTreeParser;
 import edu.kulikov.ast_parser.elements.AstElement;
 import edu.kulikov.ast_parser.reader.ReaderConfig;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.modelio.api.model.IUmlModel;
@@ -28,6 +30,7 @@ import org.modelio.module.scaladesigner.reverse.ui.ElementStatus;
 import org.modelio.module.scaladesigner.reverse.util.ScalaFileFinder;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -64,10 +67,7 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
 
             // Log it too
             ScalaDesignerModule.logService.error(e);
-            if (e instanceof InvocationTargetException)
-                throw (InvocationTargetException) e;
-            if (e instanceof InterruptedException)
-                throw (InterruptedException) e;
+            throw e;
         } finally {
             if (this.config.getReport().hasErrors()) {
                 this.config.getReport().addError(Messages.getString("Error.ReverseCanceled"), null, Messages.getString("Error.ReverseCanceled.Description"));
@@ -75,7 +75,7 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
         }
     }
 
-    private void launchSourceReverse() throws Exception {
+    private void launchSourceReverse() throws InterruptedException {
         init(true);
         ArrayList<File> sourcesFilesToReverse = getSourcesFilesToReverse(config);
         //set number of files to track progress
@@ -85,9 +85,14 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
         monitor.beginTask("Reversing", taskSize);
         //1) Generate text-AST from files
         setTaskName(Messages.getString("Gui.Reverse.GeneratingASTs"));
-        List<Map<File, String>> textASTs = getTextASTs(sourcesFilesToReverse);
-        Map<File, String> validASTs = textASTs.get(0);
-        Map<File, String> invalidFiles = textASTs.get(1); //TODO: process files with errors
+        ScalacTextRunner astProcessor = getTextASTs(sourcesFilesToReverse);
+        List<ScalacUtils.ResultInfo> validASTs = ScalacUtils.mapSourceAndStringAst(sourcesFilesToReverse, astProcessor.getResultContent());
+        List<ScalacUtils.ErrorInfo> invalidASTs = ScalacUtils.mapSourceAndErrors(sourcesFilesToReverse, astProcessor.getErrorContent()); //TODO: process files with errors
+        if (!invalidASTs.isEmpty()) {
+            invalidASTs.forEach(errorInfo -> config.getReport().addError(Messages.getString("Error.InvalidSourceException",errorInfo.getFile().toString(),errorInfo.getLineNumber()),null, Messages.getString("Error.InvalidSourceException.Description",errorInfo.getError(),errorInfo.getLine())));
+            throw new IllegalArgumentException("One or more source files are invalid, see report");
+        }
+
         // ProgressBar.updateProgressBar(null);
         updateProgressBarNTimes(sourcesFilesToReverse.size(), null);
         //2) Process text-AST to create model-AST
@@ -110,34 +115,32 @@ public class ReverseProgressTask extends ProgressBar implements IRunnableWithPro
 
     }
 
-    //returns two maps:
-    // 1 - valid file and string AST
-    // 2 - invalid file and error as string
-    private List<Map<File, String>> getTextASTs(ArrayList<File> filesToReverse) throws Exception {
+    private ScalacTextRunner getTextASTs(ArrayList<File> filesToReverse) throws InterruptedException {
 
         // ====== Get text Scala ASTs  ================
         ScalaDesignerModule.logService.info("Get text Scala ASTs");
         ITextRunner processRunner = new ScalacTextRunner(config.getCompiler(),
                 filesToReverse);
-        processRunner.run();
-        Map<File, String> parsedFiles = ScalacUtils.mapSourceAndStringAst(filesToReverse, processRunner.getResultContent());
-        Map<File, String> errorFiles = new HashMap<>(); //TODO: get error content
-        return Arrays.asList(parsedFiles, errorFiles);
+        try {
+            processRunner.run();
+        } catch (IOException e) {
+            throw new InterruptedException(e.getMessage());
+        }
+        return (ScalacTextRunner) processRunner;
     }
 
-    private List<AstElement> getASTmodels(Map<File, String> validASTs) {
+    private List<AstElement> getASTmodels(List<ScalacUtils.ResultInfo> validASTs) {
         // ====== Create models from Text ASTs ==========
         ScalaDesignerModule.logService.info("Create models from Text ASTs");
         List<AstElement> models = new ArrayList<>();
         AstTreeParser parser = new AstTreeParser(new ReaderConfig(true));
         AstElementEventHandler defaultHandler = new AstElementEventHandler();
-        models.addAll(validASTs.entrySet().stream().map(fileStringEntry -> {
-            setTaskName(Messages.getString("Gui.Reverse.CreatingAstModel", fileStringEntry.getKey().getName()));
+        models.addAll(validASTs.stream().map(resultInfo-> {
+            setTaskName(Messages.getString("Gui.Reverse.CreatingAstModel", resultInfo.getFile().getName()));
             // config.getReport().addWarning("Test warning AHAHA",null,"Test warning AHAHA description");
-            AstElement parse = parser.parse(IOUtils.toInputStream(fileStringEntry.getValue()), defaultHandler);
+            AstElement parse = parser.parse(IOUtils.toInputStream(resultInfo.getResult()), defaultHandler);
             ProgressBar.updateProgressBar(null);
             return parse;
-
         }).collect(Collectors.toList()));
         return models;
     }
