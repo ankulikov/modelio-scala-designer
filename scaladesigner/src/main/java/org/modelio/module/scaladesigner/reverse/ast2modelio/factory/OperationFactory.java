@@ -9,6 +9,8 @@ import org.modelio.metamodel.uml.statik.Parameter;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 
+import java.util.List;
+
 import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils.setStereotype;
 
 public class OperationFactory extends AbstractElementFactory<DefDef, Operation> {
@@ -29,12 +31,14 @@ public class OperationFactory extends AbstractElementFactory<DefDef, Operation> 
                     //TODO: process generic types
                     model.createReturnParameter("return", resolveType(defDef.getReturnType(), context, model.getUmlTypes()), operation);
                 }
-                for (ValDef arg : defDef.getArguments().get(0)) {
-                    Parameter parameter = model.createParameter();
-                    parameter.setName(arg.getIdentifier());
-                    //TODO: process generic types
-                    parameter.setType(resolveType(arg.getType(), context, model.getUmlTypes()));
-                    parameter.setComposed(operation);
+                for (List<ValDef> group : defDef.getArguments()) {
+                    for (ValDef arg : group) {
+                        Parameter parameter = model.createParameter();
+                        parameter.setName(arg.getIdentifier());
+                        //TODO: process generic types
+                        parameter.setType(resolveType(arg.getType(), context, model.getUmlTypes()));
+                        parameter.setComposed(operation);
+                    }
                 }
 
                 setVisibility(operation, defDef.getModifiers(), model);
