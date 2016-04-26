@@ -2,6 +2,7 @@ package org.modelio.module.scaladesigner.reverse.ast2modelio.factory;
 
 import edu.kulikov.ast_parser.elements.AstElement;
 import edu.kulikov.ast_parser.elements.Constants;
+import edu.kulikov.ast_parser.elements.Entity;
 import edu.kulikov.ast_parser.elements.Modifiers;
 import edu.kulikov.ast_parser.elements.util.AstTraverser;
 import org.modelio.api.model.IUMLTypes;
@@ -123,8 +124,8 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
         return (toReturn == null) ? types.getUNDEFINED() : toReturn;
     }
 
-    List<GeneralClass> resolveTypes(List<String> types, IContext context, IUMLTypes umlTypes) {
-        return types.stream().map(t->resolveType(t, context, umlTypes)).collect(Collectors.toList());
+    List<GeneralClass> resolveTypes(List<Entity.BaseTypeWrapper> types, IContext context, IUMLTypes umlTypes) {
+        return types.stream().map(t->resolveType(t.getBaseType(), context, umlTypes)).collect(Collectors.toList());
     }
 
     private DataType resolveUMLPrimitive(String typeIdent, IUMLTypes types) {

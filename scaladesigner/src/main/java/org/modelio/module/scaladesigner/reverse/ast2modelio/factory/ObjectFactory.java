@@ -35,11 +35,12 @@ public class ObjectFactory extends AbstractElementFactory<ModuleDef, GeneralClas
             setVisibility(object, moduleDef.getModifiers(), model);
             putModifierTags(object, moduleDef.getModifiers(), model);
         } else if (stage == Stage.REVERSE_RELATIONS) {
-            ScalaDesignerModule.logService.info("REVERSE_RELATIONS for Object, baseTypes=" + moduleDef.getBase());
-            ParentAnalyzer.analyzeParents(
-                    moduleDef,
-                    resolveTypes(moduleDef.getBase(), context, model.getUmlTypes()),
-                    model, rm);
+            ScalaDesignerModule.logService.info("REVERSE_RELATIONS for Object, baseTypes=" + moduleDef.getBaseTypes());
+            new ParentAnalyzer(model, rm)
+                    .createParentConnections(
+                            moduleDef,
+                            resolveTypes(moduleDef.getBaseTypes(), context, model.getUmlTypes()),
+                            moduleDef.getBaseTypes());
             //TODO: analyze hierarchy
         }
         return object;

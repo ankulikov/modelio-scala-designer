@@ -41,11 +41,12 @@ public class ClassFactory extends AbstractElementFactory<ClassDef, GeneralClass>
                 }
             }
         } else if (stage == Stage.REVERSE_RELATIONS) {
-            ScalaDesignerModule.logService.info("REVERSE_RELATIONS for Class, baseTypes=" + classDef.getBase());
-            ParentAnalyzer.analyzeParents(
+            ScalaDesignerModule.logService.info("REVERSE_RELATIONS for Class, baseTypes=" + classDef.getBaseTypes());
+            new ParentAnalyzer(model, rm).createParentConnections(
                     classDef,
-                    resolveTypes(classDef.getBase(), context, model.getUmlTypes()),
-                    model, rm);
+                    resolveTypes(classDef.getBaseTypes(), context, model.getUmlTypes()),
+                    classDef.getBaseTypes()
+            );
             //TODO: analyze hierarchy
         }
         return aClass;
