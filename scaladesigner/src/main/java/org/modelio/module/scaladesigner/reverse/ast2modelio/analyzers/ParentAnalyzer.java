@@ -1,6 +1,7 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers;
 
 import edu.kulikov.ast_parser.elements.Entity;
+import edu.kulikov.ast_parser.elements.ModuleDef;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.metamodel.uml.statik.ElementRealization;
@@ -13,6 +14,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
 
@@ -44,11 +46,7 @@ public class ParentAnalyzer {
     private static boolean needToShow(ModelElement element, String parentIdent) {
         List<String> noForAll = Arrays.asList("Any", "AnyRef", "scala.Any", "scala.AnyRef");
         List<String> noForCases = Arrays.asList("Serializable", "scala.Serializable", "Product", "scala.Product");
-        if (noForAll.contains(parentIdent))
-            return false;
-        if (isCase(element) && noForCases.contains(parentIdent))
-            return false;
-        return true;
+        return !noForAll.contains(parentIdent) && !(isCase(element) && noForCases.contains(parentIdent));
     }
 
     /*           |________parent_________|
@@ -56,13 +54,15 @@ public class ParentAnalyzer {
            |trait  | gen  | gen   | x      |
       this |class  | real | gen   | x      |
            |object | real | gen   | gen    | */
-    public void createParentConnections(Entity thisAst, List<GeneralClass> parents, List<Entity.BaseTypeWrapper> astParents) {
+    public void createParentConnections(Entity thisAst, Map<Entity.BaseTypeWrapper, List<GeneralClass>> parents, List<Entity.BaseTypeWrapper> astParents) {
         GeneralClass thisModel = reposManager.getByAst(thisAst, GeneralClass.class);
-        for (int i = 0; i < parents.size(); i++) {
-            if (!needToShow(thisModel, astParents.get(i).getBaseType()))
+        int i = 0;
+        for (Map.Entry<Entity.BaseTypeWrapper, List<GeneralClass>> entry : parents.entrySet()) {
+            if (!needToShow(thisModel, entry.getKey().getBaseType()))
                 continue;
-            GeneralClass parentModel = parents.get(i);
-            if (parentModel == null) continue; //TODO: think about creating unknown classes
+            List<GeneralClass> parentModels = entry.getValue();
+            if (parentModels == null || parentModels.isEmpty()) continue; //TODO: think about creating unknown classes
+            GeneralClass parentModel = chooseCorrectParent(thisModel, parentModels);
             if (i == 0) {
                 if (isTrait(parentModel) && !isTrait(thisModel))
                     createExtendsRealization(parentModel, thisModel);
@@ -72,7 +72,17 @@ public class ParentAnalyzer {
                     createMixinRealization(parentModel, thisModel, i);
                 else createMixinGeneralization(parentModel, thisModel, i);
             }
+            i++;
         }
+    }
+
+    private GeneralClass chooseCorrectParent(GeneralClass thisAst, List<GeneralClass> parentModels) {
+        if (parentModels.size() == 1) return parentModels.get(0);
+        for (GeneralClass parentModel : parentModels) {
+            if (thisAst == parentModel) continue;
+            return parentModel;
+        }
+        throw new UnsupportedOperationException("Can't choose correct parent for " + thisAst + ", candidates are: " + parentModels);
     }
 
     private void createExtendsRealization(GeneralClass parent, GeneralClass child) {

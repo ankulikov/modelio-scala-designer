@@ -12,11 +12,13 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
 import org.modelio.module.scaladesigner.util.Constants.Stereotype;
 
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
+import static org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext.Scope.CONTENT_BLOCK;
 
 public class ObjectFactory extends AbstractElementFactory<ModuleDef, GeneralClass> {
     @Override
     public GeneralClass createElement(ModuleDef moduleDef, IUmlModel model, IContext context, Stage stage) {
         GeneralClass object = rm.getByAst(moduleDef, GeneralClass.class);
+        if (context.getCurrentScopeType() == CONTENT_BLOCK) return object;
         if (stage == Stage.REVERSE_SELF_MINIMUM) {
             //there is may be class with the same name => need to check stereotype 'Object'
             if (object == null || !object.isStereotyped(MODULE_NAME, Stereotype.OBJECT)) {
@@ -44,6 +46,5 @@ public class ObjectFactory extends AbstractElementFactory<ModuleDef, GeneralClas
             //TODO: analyze hierarchy
         }
         return object;
-
     }
 }

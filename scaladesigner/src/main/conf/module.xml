@@ -23,17 +23,17 @@
                 <Image path="res/png/ScalaClass_2x.png"/>
                 <TagTypes/>
             </Stereotype>
-            <Stereotype name="ScalaObject" metaclass="Class" is-hidden="false" label="Object" uid="d0c442d6-69dd-43f5-b652-0d3ef5c28201">
+            <Stereotype name="ScalaObject" metaclass="Class" is-hidden="false" label="Scala object" uid="d0c442d6-69dd-43f5-b652-0d3ef5c28201">
                 <Icon path="res/png/ScalaObject.png"/>
                 <Image path="res/png/ScalaObject_2x.png"/>
                 <TagTypes/>
             </Stereotype>
-            <Stereotype name="ScalaTrait" metaclass="Class" is-hidden="false" label="Trait" uid="1108c1fb-4fb9-4fa0-a7dc-8b133513b7e5">
+            <Stereotype name="ScalaTrait" metaclass="Class" is-hidden="false" label="Scala trait" uid="1108c1fb-4fb9-4fa0-a7dc-8b133513b7e5">
                 <Icon path="res/png/ScalaTrait.png"/>
                 <Image path="res/png/ScalaTrait_2x.png"/>
                 <TagTypes/>
             </Stereotype>
-            <Stereotype name="ScalaCaseClass" metaclass="DataType" is-hidden="false" label="Case" uid="fa33411e-88d0-4b9a-9482-0c7bddfc39c5">
+            <Stereotype name="ScalaCaseClass" metaclass="DataType" is-hidden="false" label="Scala case class" uid="fa33411e-88d0-4b9a-9482-0c7bddfc39c5">
                 <Icon path=""/>
                 <Image path=""/>
                 <TagTypes/>

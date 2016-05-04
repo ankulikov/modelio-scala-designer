@@ -56,7 +56,7 @@ public class ReposManager {
     public AstElement getParentAstFromRepo(AstElement element) {
         if (element == NoElement.instance()) return null;
         AstElement parent = element.getParent();
-        if (transformRepo.get(parent)==null) return getParentAstFromRepo(parent);
+        if (transformRepo.get(parent) == null) return getParentAstFromRepo(parent);
         else return parent;
     }
 
@@ -85,19 +85,19 @@ public class ReposManager {
         return new ArrayList<>(byIdentifier);
     }
 
-    public <T extends ModelElement> T getByFullIdent(String fullIdent, Class<T> filter) {
-        return filter.cast(identifierRepo.getByIdentifier(fullIdent).stream().findFirst().filter(filter::isInstance).orElse(null));
+    public <T extends ModelElement> List<T> getByFullIdent(String fullIdent, Class<T> filter) {
+        return identifierRepo.getByIdentifier(fullIdent).stream().filter(filter::isInstance).map(filter::cast).collect(Collectors.toList());
     }
 
-    public <T extends ModelElement> T getByAnyIdent(String ident, String currentPackage, List<Import> importContext, Class<T> filter) {
+    public <T extends ModelElement> List<T> getByAnyIdent(String ident, String currentPackage, List<Import> importContext, Class<T> filter) {
         String[] split = ident.split("\\.");
         ScalaDesignerModule.logService.info("getByAnyIdent, ident=" + ident);
         if (split.length == 1) {
             //no dots => simple ident
-            return resolveSimpleName(ident, currentPackage, importContext).stream().filter(filter::isInstance).map(filter::cast).findFirst().orElse(null);
+            return resolveSimpleName(ident, currentPackage, importContext).stream().filter(filter::isInstance).map(filter::cast).collect(Collectors.toList());
         }
         if (split.length > 1) {
-            return identifierRepo.getByFullIdentifier(ident).stream().filter(filter::isInstance).map(filter::cast).findFirst().orElse(null);
+            return identifierRepo.getByFullIdentifier(ident).stream().filter(filter::isInstance).map(filter::cast).collect(Collectors.toList());
             //2+ dots => full ident
             //TODO: package with class (when import package A, ident is A.class_name)
             //TODO: inner class

@@ -12,12 +12,14 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
 import org.modelio.module.scaladesigner.util.Constants.Stereotype;
 
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
+import static org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext.Scope.CONTENT_BLOCK;
 
 public class ClassFactory extends AbstractElementFactory<ClassDef, GeneralClass> {
 
     @Override
     public GeneralClass createElement(ClassDef classDef, IUmlModel model, IContext context, Stage stage) {
         GeneralClass aClass = rm.getByAst(classDef, GeneralClass.class);
+        if (context.getCurrentScopeType() == CONTENT_BLOCK) return aClass;
         if (stage == Stage.REVERSE_SELF_MINIMUM) {
             if (aClass == null) {
                 ModelElement owner = rm.getParentFromRepo(classDef);

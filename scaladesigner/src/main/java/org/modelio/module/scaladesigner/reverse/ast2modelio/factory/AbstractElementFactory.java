@@ -3,6 +3,7 @@ package org.modelio.module.scaladesigner.reverse.ast2modelio.factory;
 import edu.kulikov.ast_parser.elements.AstElement;
 import edu.kulikov.ast_parser.elements.Constants;
 import edu.kulikov.ast_parser.elements.Entity;
+import edu.kulikov.ast_parser.elements.Entity.BaseTypeWrapper;
 import edu.kulikov.ast_parser.elements.Modifiers;
 import edu.kulikov.ast_parser.elements.util.AstTraverser;
 import org.modelio.api.model.IUMLTypes;
@@ -19,7 +20,7 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
 import org.modelio.module.scaladesigner.util.Constants.Stereotype;
 import org.modelio.module.scaladesigner.util.Constants.Tag;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
@@ -114,18 +115,25 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
         }
     }
 
-    GeneralClass resolveType(String type, IContext context, IUMLTypes types) {
-        if (type == null) return types.getUNDEFINED();
-        GeneralClass toReturn = resolveUMLPrimitive(type, types);
-        if (toReturn == null) {
+    List<GeneralClass> resolveType(String type, IContext context, IUMLTypes types) {
+        List<GeneralClass> undef = Collections.singletonList(types.getUNDEFINED());
+        if (type == null) {
+            return undef;
+        }
+        List<GeneralClass> toReturn = Collections.singletonList(resolveUMLPrimitive(type, types));
+        if (toReturn.get(0) == null) {
             toReturn = rm.getByAnyIdent(type, context.getCurrentPackage(), context.getImportScope(), GeneralClass.class);
             ScalaDesignerModule.logService.info("ResolveType, byIdent=" + toReturn);
         }
-        return (toReturn == null) ? types.getUNDEFINED() : toReturn;
+        return (toReturn == null || toReturn.isEmpty()) ? undef : toReturn;
     }
 
-    List<GeneralClass> resolveTypes(List<Entity.BaseTypeWrapper> types, IContext context, IUMLTypes umlTypes) {
-        return types.stream().map(t->resolveType(t.getBaseType(), context, umlTypes)).collect(Collectors.toList());
+    Map<BaseTypeWrapper, List<GeneralClass>> resolveTypes(List<BaseTypeWrapper> types, IContext context, IUMLTypes umlTypes) {
+        HashMap<BaseTypeWrapper, List<GeneralClass>> map = new HashMap<>();
+        for (BaseTypeWrapper type : types) {
+            map.put(type, resolveType(type.getBaseType(), context, umlTypes));
+        }
+        return map;
     }
 
     private DataType resolveUMLPrimitive(String typeIdent, IUMLTypes types) {

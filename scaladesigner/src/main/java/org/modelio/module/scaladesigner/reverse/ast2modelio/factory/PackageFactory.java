@@ -59,7 +59,7 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
         } else {
             String simpleBeforeDot = beforeFirstDot(simpleName);
             String fullIdent = (namePrefix.isEmpty() ? namePrefix + '.' : "") + simpleBeforeDot;
-            Package aPackage = rm.getByFullIdent(fullIdent, Package.class);
+            Package aPackage = rm.getByFullIdent(fullIdent, Package.class).get(0);
             if (aPackage == null) {
                 aPackage = model.createPackage(simpleBeforeDot, (NameSpace) owner);
                 ModelUtils.setStereotype(model, aPackage, MODULE_NAME, Stereotype.PACKAGE, true);
