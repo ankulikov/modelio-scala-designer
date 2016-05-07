@@ -90,6 +90,14 @@
                     <TagType name="ScalaSealed" uid="7ebf294d-bf22-4092-b6c8-b13e49b821e6" label="Sealed" parameter-card="0" is-hidden="false" is-signed="false"/>
                 </TagTypes>
             </MetaclassReference>
+            <MetaclassReference uid="0ee6d917-df1f-41cd-ac7a-7137eca5f423" metaclass="TemplateParameter">
+                <TagTypes>
+                    <TagType name="ScalaCovariant" uid="2a2b3a12-dc0f-46ef-9ded-76a58a677e38" label="Covariant" parameter-card="0" is-hidden="false" is-signed="false"/>
+                    <TagType name="ScalaContravariant" uid="479561a4-c34b-486e-b003-5f12aabca19a" label="Contravariant" parameter-card="0" is-hidden="false" is-signed="false"/>
+                    <TagType name="ScalaLowerTypeBound" uid="f0429d65-69f9-49a5-8147-91da41bc7345" label="Lower type bound" parameter-card="1" is-hidden="false"/>
+                    <TagType name="ScalaUpperTypeBound" uid="67a60ce8-7aea-404c-9f62-e5dcfed443e8" label="Upper type bound" parameter-card="1" is-hidden="false"/>
+                </TagTypes>
+            </MetaclassReference>
         </Profile>
     </Profiles>
     <Parameters>

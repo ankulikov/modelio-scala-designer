@@ -1,10 +1,13 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.factory;
 
 import edu.kulikov.ast_parser.elements.ClassDef;
+import edu.kulikov.ast_parser.elements.TypeBoundsTree;
+import edu.kulikov.ast_parser.elements.TypeDef;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.metamodel.uml.statik.GeneralClass;
 import org.modelio.metamodel.uml.statik.NameSpace;
+import org.modelio.metamodel.uml.statik.TemplateParameter;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers.ParentAnalyzer;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
@@ -13,6 +16,8 @@ import org.modelio.module.scaladesigner.util.Constants.Stereotype;
 
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
 import static org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext.Scope.CONTENT_BLOCK;
+import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils.setTaggedValue;
+import static org.modelio.module.scaladesigner.util.Constants.Tag.*;
 
 public class ClassFactory extends AbstractElementFactory<ClassDef, GeneralClass> {
 
@@ -42,6 +47,7 @@ public class ClassFactory extends AbstractElementFactory<ClassDef, GeneralClass>
                     ModelUtils.setStereotype(model, aClass, MODULE_NAME, Stereotype.CASE, true);
                 }
             }
+            addTypeParameters(aClass, classDef, model);
         } else if (stage == Stage.REVERSE_RELATIONS) {
             ScalaDesignerModule.logService.info("REVERSE_RELATIONS for Class, baseTypes=" + classDef.getBaseTypes());
             new ParentAnalyzer(model, rm).createParentConnections(
@@ -49,8 +55,36 @@ public class ClassFactory extends AbstractElementFactory<ClassDef, GeneralClass>
                     resolveTypes(classDef.getBaseTypes(), context, model.getUmlTypes()),
                     classDef.getBaseTypes()
             );
+
+            //model.createTemplateParameterSubstitution().
+           // model.createTemplateParameter().setTy
             //TODO: analyze hierarchy
         }
         return aClass;
+    }
+
+    private void addTypeParameters(GeneralClass generalClass, ClassDef classDef, IUmlModel model) {
+        if (!classDef.hasTypeParams()) return;
+        for (TypeDef typeDef : classDef.getTypeParams()) {
+            TemplateParameter typeParam = model.createTemplateParameter();
+            typeParam.setName(typeDef.getIdentifier());
+            if (typeDef.isCovariant()) {
+                setTaggedValue(model, typeParam, MODULE_NAME, COVARIANT, true);
+            }
+            if (typeDef.isContrvariant()) {
+                setTaggedValue(model, typeParam, MODULE_NAME, CONTRAVARIANT, true);
+            }
+            TypeBoundsTree boundsTree = typeDef.getConstraints();
+            if (boundsTree != null) {
+                if (boundsTree.hasLowerConstraint()) {
+                    setTaggedValue(model, typeParam, MODULE_NAME, LOWER_BOUND, boundsTree.getLowerConstraint(), true);
+                }
+                if (boundsTree.hasUpperConstraint()) {
+                    setTaggedValue(model, typeParam, MODULE_NAME, UPPER_BOUND, boundsTree.getUpperConstraint(), true);
+                }
+            }
+            typeParam.setParameterized(generalClass);
+            rm.attachIdentToModelio(typeParam, typeDef.getFullIdentifier());
+        }
     }
 }

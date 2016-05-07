@@ -18,6 +18,10 @@ public interface Constants {
         String IMPLICIT = "ScalaImplicit";
         String OVERRIDE = "ScalaOverride";
         String MUTABLE = "ScalaMutable";
+        String CONTRAVARIANT = "ScalaContravariant";
+        String COVARIANT = "ScalaCovariant";
+        String LOWER_BOUND = "ScalaLowerTypeBound";
+        String UPPER_BOUND = "ScalaUpperTypeBound";
     }
 
 }
