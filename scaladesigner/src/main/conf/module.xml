@@ -8,7 +8,7 @@
         <PathEntry path="lib/commons-lang3-3.1.jar"/>
         <PathEntry path="lib/commons-io-2.4.jar"/>
         <PathEntry path="lib/guava-19.0.jar"/>
-        <PathEntry path="lib/scala-ast-parser-0.9.2.jar"/>
+        <PathEntry path="lib/scala-ast-parser-0.9.3.jar"/>
         <PathEntry path="lib/slf4j-api-1.7.13.jar"/>
     </ClassPath>
     <Profiles>

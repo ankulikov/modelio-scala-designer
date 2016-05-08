@@ -50,14 +50,12 @@ public class ClassFactory extends AbstractElementFactory<ClassDef, GeneralClass>
             addTypeParameters(aClass, classDef, model);
         } else if (stage == Stage.REVERSE_RELATIONS) {
             ScalaDesignerModule.logService.info("REVERSE_RELATIONS for Class, baseTypes=" + classDef.getBaseTypes());
-            new ParentAnalyzer(model, rm).createParentConnections(
-                    classDef,
-                    resolveTypes(classDef.getBaseTypes(), context, model.getUmlTypes()),
-                    classDef.getBaseTypes()
-            );
+            new ParentAnalyzer(model, rm)
+                    .createParentConnections(classDef, context);
+
 
             //model.createTemplateParameterSubstitution().
-           // model.createTemplateParameter().setTy
+            // model.createTemplateParameter().setTy
             //TODO: analyze hierarchy
         }
         return aClass;
@@ -84,6 +82,7 @@ public class ClassFactory extends AbstractElementFactory<ClassDef, GeneralClass>
                 }
             }
             typeParam.setParameterized(generalClass);
+            //generalClass.getTypingParameter().add(typeParam);
             rm.attachIdentToModelio(typeParam, typeDef.getFullIdentifier());
         }
     }

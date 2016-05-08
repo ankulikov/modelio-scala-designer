@@ -1,12 +1,11 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers;
 
 import edu.kulikov.ast_parser.elements.Entity;
-import edu.kulikov.ast_parser.elements.ModuleDef;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
-import org.modelio.metamodel.uml.statik.ElementRealization;
-import org.modelio.metamodel.uml.statik.GeneralClass;
-import org.modelio.metamodel.uml.statik.Generalization;
+import org.modelio.metamodel.uml.statik.*;
+import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.ReposManager;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
 import org.modelio.module.scaladesigner.util.Constants;
@@ -15,16 +14,19 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
 
 public class ParentAnalyzer {
-    private IUmlModel umlModel;
-    private ReposManager reposManager;
+    private final IUmlModel umlModel;
+    private final ReposManager reposManager;
+    private final TypeResolver typeResolver;
 
     public ParentAnalyzer(IUmlModel umlModel, ReposManager reposManager) {
         this.umlModel = umlModel;
         this.reposManager = reposManager;
+        this.typeResolver = new TypeResolver(reposManager);
     }
 
     public static void checkForInnerClass() {
@@ -54,8 +56,9 @@ public class ParentAnalyzer {
            |trait  | gen  | gen   | x      |
       this |class  | real | gen   | x      |
            |object | real | gen   | gen    | */
-    public void createParentConnections(Entity thisAst, Map<Entity.BaseTypeWrapper, List<GeneralClass>> parents, List<Entity.BaseTypeWrapper> astParents) {
+    public void createParentConnections(Entity thisAst, IContext context) {
         GeneralClass thisModel = reposManager.getByAst(thisAst, GeneralClass.class);
+        Map<Entity.BaseTypeWrapper, List<GeneralClass>> parents = typeResolver.resolveTypes(thisAst.getBaseTypes(), context, umlModel.getUmlTypes());
         int i = 0;
         for (Map.Entry<Entity.BaseTypeWrapper, List<GeneralClass>> entry : parents.entrySet()) {
             if (!needToShow(thisModel, entry.getKey().getBaseType()))
@@ -73,7 +76,37 @@ public class ParentAnalyzer {
                 else createMixinGeneralization(parentModel, thisModel, i);
             }
             i++;
+            createTypeInstantiation(parentModel, thisModel, entry.getKey(), context);
         }
+    }
+
+    private void createTypeInstantiation(GeneralClass template, GeneralClass bound,
+                                         Entity.BaseTypeWrapper parent, IContext context) {
+        if (!parent.isApplied()) return;
+        //========= binding: link between two classes ===========
+        TemplateBinding binding = umlModel.createTemplateBinding();
+        binding.setInstanciatedTemplate(template);
+        binding.setBoundElement(bound);
+        //========= extract type params from template class ======
+        List<TemplateParameter> templateParameters = getTemplateParameters(template);
+        int i = 0;
+        for (String type : parent.getTypeParams()) {
+            GeneralClass aClass = typeResolver.resolveType(type, context, umlModel.getUmlTypes()).get(0);
+            TemplateParameterSubstitution substitution = umlModel.createTemplateParameterSubstitution();
+            TemplateParameter templateParameter = templateParameters.get(i);
+            ScalaDesignerModule.logService.info("createTypeInstantiation, resolve template parameter: " + templateParameter.getName() + ", index=" + i);
+
+            binding.getParameterSubstitution().add(substitution); //add substitution to binding
+            substitution.setFormalParameter(templateParameter); //link substitution with param from template class
+            substitution.setActual(aClass); //link substitution with substituted type
+            i++;
+        }
+
+
+    }
+
+    private List<TemplateParameter> getTemplateParameters(GeneralClass generalClass) {
+        return generalClass.getCompositionChildren().stream().filter(TemplateParameter.class::isInstance).map(c->(TemplateParameter)c).collect(Collectors.toList());
     }
 
     private GeneralClass chooseCorrectParent(GeneralClass thisAst, List<GeneralClass> parentModels) {
@@ -90,6 +123,7 @@ public class ParentAnalyzer {
         parent.getImpactedDependency().add(elementRealization);
         child.getDependsOnDependency().add(elementRealization);
         ModelUtils.setStereotype(umlModel, elementRealization, MODULE_NAME, Constants.Stereotype.EXTENDS, true);
+
     }
 
     private void createExtendsGeneralization(GeneralClass parent, GeneralClass child) {

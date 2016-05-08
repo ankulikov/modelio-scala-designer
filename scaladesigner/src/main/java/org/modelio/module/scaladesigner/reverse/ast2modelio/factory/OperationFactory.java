@@ -7,6 +7,7 @@ import org.modelio.metamodel.uml.statik.Classifier;
 import org.modelio.metamodel.uml.statik.Operation;
 import org.modelio.metamodel.uml.statik.Parameter;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers.TypeResolver;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class OperationFactory extends AbstractElementFactory<DefDef, Operation> 
         if (context.getCurrentScopeType() == CONTENT_BLOCK) return operation;
         if (stage == Stage.REVERSE_SELF_MINIMUM || stage == Stage.REVERSE_SELF_FULL) {
             if (operation == null) {
+                TypeResolver typeResolver = new TypeResolver(rm);
                 Entity parent = (Entity) parent(defDef, Entity.class);
                 ModelElement owner = rm.getParentFromRepo(defDef);
                 ScalaDesignerModule.logService.info("Create operation: " + defDef + " owner: " + owner);
@@ -31,14 +33,14 @@ public class OperationFactory extends AbstractElementFactory<DefDef, Operation> 
                 } else {
                     //constructor doesn't have return parameters
                     //TODO: process generic types
-                    model.createReturnParameter("return", resolveType(defDef.getReturnType(), context, model.getUmlTypes()).get(0), operation);
+                    model.createReturnParameter("return", typeResolver.resolveType(defDef.getReturnType(), context, model.getUmlTypes()).get(0), operation);
                 }
                 for (List<ValDef> group : defDef.getArguments()) {
                     for (ValDef arg : group) {
                         Parameter parameter = model.createParameter();
                         parameter.setName(arg.getIdentifier());
                         //TODO: process generic types
-                        parameter.setType(resolveType(arg.getType(), context, model.getUmlTypes()).get(0));
+                        parameter.setType(typeResolver.resolveType(arg.getType(), context, model.getUmlTypes()).get(0));
                         parameter.setComposed(operation);
                     }
                 }

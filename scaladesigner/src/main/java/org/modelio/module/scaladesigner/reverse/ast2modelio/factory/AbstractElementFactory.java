@@ -19,10 +19,7 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
 import org.modelio.module.scaladesigner.util.Constants.Stereotype;
 import org.modelio.module.scaladesigner.util.Constants.Tag;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
 
@@ -112,57 +109,7 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
         }
     }
 
-    List<GeneralClass> resolveType(String type, IContext context, IUMLTypes types) {
-        List<GeneralClass> undef = Collections.singletonList(types.getUNDEFINED());
-        if (type == null) {
-            return undef;
-        }
-        List<GeneralClass> toReturn = Collections.singletonList(resolveUMLPrimitive(type, types));
-        if (toReturn.get(0) == null) {
-            toReturn = rm.getByAnyIdent(type, context.getCurrentPackage(), context.getImportScope(), GeneralClass.class);
-            ScalaDesignerModule.logService.info("ResolveType, byIdent=" + toReturn);
-        }
-        return (toReturn == null || toReturn.isEmpty()) ? undef : toReturn;
-    }
 
-    Map<BaseTypeWrapper, List<GeneralClass>> resolveTypes(List<BaseTypeWrapper> types, IContext context, IUMLTypes umlTypes) {
-        HashMap<BaseTypeWrapper, List<GeneralClass>> map = new HashMap<>();
-        for (BaseTypeWrapper type : types) {
-            map.put(type, resolveType(type.getBaseType(), context, umlTypes));
-        }
-        return map;
-    }
-
-    private DataType resolveUMLPrimitive(String typeIdent, IUMLTypes types) {
-        switch (typeIdent) {
-            case "Int":
-            case "scala.Int":
-                return types.getINTEGER();
-            case "Char":
-            case "scala.Char":
-                return types.getCHAR();
-            case "Byte":
-            case "scala.Byte":
-                return types.getBYTE();
-            case "Double":
-            case "scala.Double":
-                return types.getDOUBLE();
-            case "Boolean":
-            case "scala.Boolean":
-                return types.getBOOLEAN();
-            case "Long":
-            case "scala.Long":
-                return types.getLONG();
-            case "Short":
-            case "scala.Short":
-                return types.getSHORT();
-            case "String":
-            case "Predef.String":
-                return types.getSTRING();
-            default:
-                return null;
-        }
-    }
 
 
 }
