@@ -5,6 +5,7 @@ import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.metamodel.uml.statik.Attribute;
 import org.modelio.metamodel.uml.statik.Classifier;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers.MultiplicityAnalyzer;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers.TypeResolver;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 
@@ -27,7 +28,8 @@ public class VariableFactory extends AbstractElementFactory<ValDef, Attribute> {
                 //TODO: set value of field (initializer)?
                 //TODO: process generic types
                 TypeResolver typeResolver = new TypeResolver(rm);
-                attribute.setType(typeResolver.resolveType(valDef.getType(), context, model.getUmlTypes()).get(0));
+                attribute.setType(typeResolver.resolveType(valDef.getTypeWrapper(), context, model.getUmlTypes()).get(0));
+                MultiplicityAnalyzer.setMultiplicity(attribute, valDef.getTypeWrapper());
                 setVisibility(attribute, valDef.getModifiers(), model);
                 putModifierTags(attribute, valDef.getModifiers(), model);
                 rm.attachIdentToModelio(attribute, valDef.getFullIdentifier());

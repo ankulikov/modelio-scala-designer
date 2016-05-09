@@ -1,7 +1,6 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers;
 
-import edu.kulikov.ast_parser.elements.Entity;
-import edu.kulikov.ast_parser.elements.TypeBoundsTree;
+import edu.kulikov.ast_parser.elements.TypeWrapper;
 import org.modelio.api.model.IUMLTypes;
 import org.modelio.metamodel.uml.statik.DataType;
 import org.modelio.metamodel.uml.statik.GeneralClass;
@@ -16,34 +15,46 @@ import java.util.Map;
 
 public class TypeResolver {
     private ReposManager rm;
+    private static List<GeneralClass> undef;
 
     public TypeResolver(ReposManager reposManager) {
         this.rm = reposManager;
     }
 
-   public List<GeneralClass> resolveType(String type, IContext context, IUMLTypes types) {
-        List<GeneralClass> undef = Collections.singletonList(types.getUNDEFINED());
-        if (type == null) {
+    public List<GeneralClass> resolveType(String type,  IContext context, IUMLTypes types) {
+        return resolveType(new TypeWrapper(type), context, types);
+    }
+
+    public List<GeneralClass> resolveType(TypeWrapper typeWrapper, IContext context, IUMLTypes types) {
+        if (undef == null) {
+            undef = Collections.singletonList(types.getUNDEFINED());
+        }
+        if (typeWrapper == null || typeWrapper.getType() == null) {
             return undef;
         }
-        List<GeneralClass> toReturn = Collections.singletonList(resolveUMLPrimitive(type, types));
+        //for array we extract its type; don't forget to set multiplicity for UML parameter!
+        if (MultiplicityAnalyzer.isArray(typeWrapper) && typeWrapper.isApplied()) {
+            return resolveType(new TypeWrapper(typeWrapper.getTypeParams().get(0)), context, types);
+        }
+
+        List<GeneralClass> toReturn = Collections.singletonList(resolveUMLPrimitive(typeWrapper, types));
         if (toReturn.get(0) == null) {
-            toReturn = rm.getByAnyIdent(type, context.getCurrentPackage(), context.getImportScope(), GeneralClass.class);
+            toReturn = rm.getByAnyIdent(typeWrapper.getType(), context.getCurrentPackage(), context.getImportScope(), GeneralClass.class);
             ScalaDesignerModule.logService.info("ResolveType, byIdent=" + toReturn);
         }
         return (toReturn == null || toReturn.isEmpty()) ? undef : toReturn;
     }
 
-    public Map<Entity.BaseTypeWrapper, List<GeneralClass>> resolveTypes(List<Entity.BaseTypeWrapper> types, IContext context, IUMLTypes umlTypes) {
-        LinkedHashMap<Entity.BaseTypeWrapper, List<GeneralClass>> map = new LinkedHashMap<>();
-        for (Entity.BaseTypeWrapper type : types) {
-            map.put(type, resolveType(type.getBaseType(), context, umlTypes));
+    public Map<TypeWrapper, List<GeneralClass>> resolveTypes(List<TypeWrapper> types, IContext context, IUMLTypes umlTypes) {
+        LinkedHashMap<TypeWrapper, List<GeneralClass>> map = new LinkedHashMap<>();
+        for (TypeWrapper type : types) {
+            map.put(type, resolveType(type, context, umlTypes));
         }
         return map;
     }
 
-    private DataType resolveUMLPrimitive(String typeIdent, IUMLTypes types) {
-        switch (typeIdent) {
+    private DataType resolveUMLPrimitive(TypeWrapper typeWrapper, IUMLTypes types) {
+        switch (typeWrapper.getType()) {
             case "Int":
             case "scala.Int":
                 return types.getINTEGER();

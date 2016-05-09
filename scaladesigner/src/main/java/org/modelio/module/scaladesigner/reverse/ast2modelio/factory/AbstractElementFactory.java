@@ -2,24 +2,23 @@ package org.modelio.module.scaladesigner.reverse.ast2modelio.factory;
 
 import edu.kulikov.ast_parser.elements.AstElement;
 import edu.kulikov.ast_parser.elements.Constants;
-import edu.kulikov.ast_parser.elements.Entity.BaseTypeWrapper;
 import edu.kulikov.ast_parser.elements.Modifiers;
 import edu.kulikov.ast_parser.elements.util.AstTraverser;
-import org.modelio.api.model.IUMLTypes;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.factory.ExtensionNotFoundException;
 import org.modelio.metamodel.uml.infrastructure.Constraint;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
-import org.modelio.metamodel.uml.statik.*;
+import org.modelio.metamodel.uml.statik.Feature;
+import org.modelio.metamodel.uml.statik.NameSpace;
+import org.modelio.metamodel.uml.statik.VisibilityMode;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
-import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IElementFactory;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.repos.ReposManager;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
 import org.modelio.module.scaladesigner.util.Constants.Stereotype;
 import org.modelio.module.scaladesigner.util.Constants.Tag;
 
-import java.util.*;
+import java.util.List;
 
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
 
@@ -108,8 +107,6 @@ abstract class AbstractElementFactory<From extends AstElement, To extends ModelE
             }
         }
     }
-
-
 
 
 }

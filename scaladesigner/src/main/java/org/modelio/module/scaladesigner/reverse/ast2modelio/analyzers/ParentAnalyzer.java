@@ -1,6 +1,7 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers;
 
 import edu.kulikov.ast_parser.elements.Entity;
+import edu.kulikov.ast_parser.elements.TypeWrapper;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.metamodel.uml.statik.*;
@@ -58,10 +59,10 @@ public class ParentAnalyzer {
            |object | real | gen   | gen    | */
     public void createParentConnections(Entity thisAst, IContext context) {
         GeneralClass thisModel = reposManager.getByAst(thisAst, GeneralClass.class);
-        Map<Entity.BaseTypeWrapper, List<GeneralClass>> parents = typeResolver.resolveTypes(thisAst.getBaseTypes(), context, umlModel.getUmlTypes());
+        Map<TypeWrapper, List<GeneralClass>> parents = typeResolver.resolveTypes(thisAst.getBaseTypes(), context, umlModel.getUmlTypes());
         int i = 0;
-        for (Map.Entry<Entity.BaseTypeWrapper, List<GeneralClass>> entry : parents.entrySet()) {
-            if (!needToShow(thisModel, entry.getKey().getBaseType()))
+        for (Map.Entry<TypeWrapper, List<GeneralClass>> entry : parents.entrySet()) {
+            if (!needToShow(thisModel, entry.getKey().getType()))
                 continue;
             List<GeneralClass> parentModels = entry.getValue();
             if (parentModels == null || parentModels.isEmpty()) continue; //TODO: think about creating unknown classes
@@ -81,7 +82,7 @@ public class ParentAnalyzer {
     }
 
     private void createTypeInstantiation(GeneralClass template, GeneralClass bound,
-                                         Entity.BaseTypeWrapper parent, IContext context) {
+                                         TypeWrapper parent, IContext context) {
         if (!parent.isApplied()) return;
         //========= binding: link between two classes ===========
         TemplateBinding binding = umlModel.createTemplateBinding();
@@ -91,14 +92,14 @@ public class ParentAnalyzer {
         List<TemplateParameter> templateParameters = getTemplateParameters(template);
         int i = 0;
         for (String type : parent.getTypeParams()) {
-            GeneralClass aClass = typeResolver.resolveType(type, context, umlModel.getUmlTypes()).get(0);
+            GeneralClass paramClass = typeResolver.resolveType(type, context, umlModel.getUmlTypes()).get(0);
             TemplateParameterSubstitution substitution = umlModel.createTemplateParameterSubstitution();
             TemplateParameter templateParameter = templateParameters.get(i);
             ScalaDesignerModule.logService.info("createTypeInstantiation, resolve template parameter: " + templateParameter.getName() + ", index=" + i);
 
             binding.getParameterSubstitution().add(substitution); //add substitution to binding
             substitution.setFormalParameter(templateParameter); //link substitution with param from template class
-            substitution.setActual(aClass); //link substitution with substituted type
+            substitution.setActual(paramClass); //link substitution with substituted type
             i++;
         }
 

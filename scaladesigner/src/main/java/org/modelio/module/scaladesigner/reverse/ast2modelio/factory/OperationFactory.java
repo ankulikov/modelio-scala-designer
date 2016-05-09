@@ -1,12 +1,15 @@
 package org.modelio.module.scaladesigner.reverse.ast2modelio.factory;
 
-import edu.kulikov.ast_parser.elements.*;
+import edu.kulikov.ast_parser.elements.DefDef;
+import edu.kulikov.ast_parser.elements.Entity;
+import edu.kulikov.ast_parser.elements.ValDef;
 import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.metamodel.uml.statik.Classifier;
 import org.modelio.metamodel.uml.statik.Operation;
 import org.modelio.metamodel.uml.statik.Parameter;
 import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
+import org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers.MultiplicityAnalyzer;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.analyzers.TypeResolver;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.api.IContext;
 
@@ -33,14 +36,21 @@ public class OperationFactory extends AbstractElementFactory<DefDef, Operation> 
                 } else {
                     //constructor doesn't have return parameters
                     //TODO: process generic types
-                    model.createReturnParameter("return", typeResolver.resolveType(defDef.getReturnType(), context, model.getUmlTypes()).get(0), operation);
+                    Parameter returnParameter = model.createReturnParameter(
+                            "return",
+                            typeResolver.resolveType(
+                                    defDef.getReturnTypeWrapper(),
+                                    context, model.getUmlTypes()).get(0),
+                            operation);
+                    MultiplicityAnalyzer.setMultiplicity(
+                            returnParameter, defDef.getReturnTypeWrapper());
                 }
                 for (List<ValDef> group : defDef.getArguments()) {
                     for (ValDef arg : group) {
                         Parameter parameter = model.createParameter();
                         parameter.setName(arg.getIdentifier());
                         //TODO: process generic types
-                        parameter.setType(typeResolver.resolveType(arg.getType(), context, model.getUmlTypes()).get(0));
+                        parameter.setType(typeResolver.resolveType(arg.getTypeWrapper(), context, model.getUmlTypes()).get(0));
                         parameter.setComposed(operation);
                     }
                 }
