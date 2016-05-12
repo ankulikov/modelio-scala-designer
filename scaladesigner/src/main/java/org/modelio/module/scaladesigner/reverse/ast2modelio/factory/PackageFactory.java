@@ -13,6 +13,8 @@ import org.modelio.module.scaladesigner.reverse.ast2modelio.util.ModelUtils;
 import org.modelio.module.scaladesigner.util.Constants.Stereotype;
 import org.modelio.vcore.smkernel.mapi.MObject;
 
+import java.util.List;
+
 import static org.modelio.module.scaladesigner.api.IScalaDesignerPeerModule.MODULE_NAME;
 import static org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUtils.*;
 
@@ -59,12 +61,15 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
         } else {
             String simpleBeforeDot = beforeFirstDot(simpleName);
             String fullIdent = (namePrefix.isEmpty() ? namePrefix + '.' : "") + simpleBeforeDot;
-            Package aPackage = rm.getByFullIdent(fullIdent, Package.class).get(0);
-            if (aPackage == null) {
+            List<Package> packages = rm.getByFullIdent(fullIdent, Package.class);
+            Package aPackage;
+            if (packages.isEmpty()) {
                 aPackage = model.createPackage(simpleBeforeDot, (NameSpace) owner);
                 ModelUtils.setStereotype(model, aPackage, MODULE_NAME, Stereotype.PACKAGE, true);
                 //save intermediate packages
                 rm.attachIdentToModelio(aPackage, fullIdent);
+            } else {
+                aPackage = packages.get(0);
             }
             return createPackageRecursive(model, aPackage, namePrefix, afterFirstDot(simpleName));
         }
