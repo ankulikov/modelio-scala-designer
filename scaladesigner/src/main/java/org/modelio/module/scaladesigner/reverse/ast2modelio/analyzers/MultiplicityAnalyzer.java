@@ -5,6 +5,7 @@ import org.modelio.api.model.IUmlModel;
 import org.modelio.metamodel.uml.infrastructure.ModelElement;
 import org.modelio.metamodel.uml.statik.Parameter;
 import org.modelio.metamodel.uml.statik.StructuralFeature;
+import org.modelio.module.scaladesigner.impl.ScalaDesignerModule;
 import org.modelio.module.scaladesigner.reverse.ast2modelio.util.StringUtils;
 
 import java.util.Arrays;
@@ -34,6 +35,7 @@ public class MultiplicityAnalyzer {
      * @param typeWrapper
      */
     public static void setMultiplicity(ModelElement element, TypeWrapper typeWrapper) {
+        if (typeWrapper == null) return;
         if (isArray(typeWrapper)) {
             if (element instanceof StructuralFeature) {
                 ((StructuralFeature) element).setMultiplicityMin("0");
@@ -47,6 +49,6 @@ public class MultiplicityAnalyzer {
     }
 
     public static boolean isArray(TypeWrapper typeWrapper) {
-        return (StringUtils.afterLastDot(typeWrapper.getType()).equals(ARRAY));
+        return typeWrapper != null && (StringUtils.afterLastDot(typeWrapper.getType()).equals(ARRAY));
     }
 }
