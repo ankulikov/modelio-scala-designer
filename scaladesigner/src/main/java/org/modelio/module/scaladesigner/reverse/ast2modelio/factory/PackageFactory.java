@@ -60,18 +60,22 @@ public class PackageFactory extends AbstractElementFactory<PackageDef, Package> 
             return aPackage;
         } else {
             String simpleBeforeDot = beforeFirstDot(simpleName);
-            String fullIdent = (namePrefix.isEmpty() ? namePrefix + '.' : "") + simpleBeforeDot;
+            ScalaDesignerModule.logService.info("CreatePackageRecursive, simpleBeforeDot:" + simpleBeforeDot);
+            String fullIdent = (namePrefix.isEmpty() ? "": namePrefix + '.') + simpleBeforeDot;
+            ScalaDesignerModule.logService.info("CreatePackageRecursive, get package by fullIdent: " + fullIdent);
             List<Package> packages = rm.getByFullIdent(fullIdent, Package.class);
             Package aPackage;
             if (packages.isEmpty()) {
+                ScalaDesignerModule.logService.info("Package not found");
                 aPackage = model.createPackage(simpleBeforeDot, (NameSpace) owner);
                 ModelUtils.setStereotype(model, aPackage, MODULE_NAME, Stereotype.PACKAGE, true);
                 //save intermediate packages
                 rm.attachIdentToModelio(aPackage, fullIdent);
             } else {
                 aPackage = packages.get(0);
+                ScalaDesignerModule.logService.info("CreatePackageRecursive, package found=" + aPackage);
             }
-            return createPackageRecursive(model, aPackage, namePrefix, afterFirstDot(simpleName));
+            return createPackageRecursive(model, aPackage, fullIdent, afterFirstDot(simpleName));
         }
     }
 }

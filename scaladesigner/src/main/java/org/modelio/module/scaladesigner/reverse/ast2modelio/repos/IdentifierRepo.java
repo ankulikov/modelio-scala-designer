@@ -41,9 +41,14 @@ public class IdentifierRepo implements IRepository {
     }
 
     public Set<ModelElement> getByIdentifier(String identifier) {
-        if (identifier.contains("."))
-            return getByFullIdentifier(identifier);
-        return getBySimpleIdentifier(identifier).stream().map(Pair::getRight).collect(Collectors.toSet());
+        Set<ModelElement> byFullIdentifier = getByFullIdentifier(identifier);
+        if (byFullIdentifier == null || byFullIdentifier.isEmpty()) {
+            return getBySimpleIdentifier(identifier).stream().map(Pair::getRight).collect(Collectors.toSet());
+        } else
+            return byFullIdentifier;
+//        if (identifier.contains("."))
+//            return getByFullIdentifier(identifier);
+//        return getBySimpleIdentifier(identifier).stream().map(Pair::getRight).collect(Collectors.toSet());
     }
 
     public Set<ModelElement> getByFullIdentifier(String fullIdentifier) {
