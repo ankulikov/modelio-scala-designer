@@ -74,9 +74,9 @@
             </MetaclassReference>
             <MetaclassReference uid="381a184a-df92-4748-a943-7c2b83526419" metaclass="Operation">
                 <TagTypes>
-                    <TagType name="ScalaFinal" uid="903aeab3-b427-4e68-a00b-258a3b5a32b8" label="Final" parameter-card="0" is-hidden="true" is-signed="false"/>
-                    <TagType name="ScalaImplicit" uid="132b3677-e40a-406e-be6c-869c67473df0" label="Implicit" parameter-card="0" is-hidden="true" is-signed="false"/>
-                    <TagType name="ScalaOverride" uid="fc7d1428-e16a-4e2c-a958-63b3c1e0cd1c" label="Override" parameter-card="0" is-hidden="true" is-signed="false"/>
+                    <TagType name="ScalaFinal" uid="903aeab3-b427-4e68-a00b-258a3b5a32b8" label="Final" parameter-card="0" is-hidden="false" is-signed="false"/>
+                    <TagType name="ScalaImplicit" uid="132b3677-e40a-406e-be6c-869c67473df0" label="Implicit" parameter-card="0" is-hidden="false" is-signed="false"/>
+                    <TagType name="ScalaOverride" uid="fc7d1428-e16a-4e2c-a958-63b3c1e0cd1c" label="Override" parameter-card="0" is-hidden="false" is-signed="false"/>
                 </TagTypes>
             </MetaclassReference>
             <MetaclassReference uid="f6b9b77a-5536-4176-a298-e77b2bb9c145" metaclass="Parameter">
